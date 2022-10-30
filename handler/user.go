@@ -30,7 +30,6 @@ func UserIndexHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 
 func UserInfoHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
 		var req types.UserInfoReq
 		if err := ctx.ShouldBind(&req); err != nil {
 			ctx.JSON(http.StatusOK, svcCtx.Response.Error(err.Error()))

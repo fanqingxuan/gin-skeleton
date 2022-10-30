@@ -34,13 +34,21 @@ func (that *Log) Error(keywords string, message interface{}) {
 }
 
 func (that *Log) Printf(level zapcore.Level, keywords string, message interface{}) {
-	msg, err := json.Marshal(message)
-	if err != nil {
-		panic("write log error:" + err.Error())
+	var msg string
+	switch message.(type) {
+	case string:
+		msg = message.(string)
+	default:
+		s, err := json.Marshal(message)
+		if err != nil {
+			panic("write log error:" + err.Error())
+		}
+		msg = string(s)
 	}
+
 	traceId := that.ctx.Value("traceId")
 
-	s := fmt.Sprintf("%s\t%s\t%s", traceId, keywords, string(msg))
+	s := fmt.Sprintf("%s\t%s\t%s", traceId, keywords, msg)
 	that.log.Log(level, s)
 }
 
@@ -114,7 +122,7 @@ func initLogger(logpath string, loglevel string) *zap.Logger {
 	)
 	// 开启开发模式，堆栈跟踪
 	caller := zap.AddCaller()
-	skip_caller := zap.AddCallerSkip(2)
+	skip_caller := zap.AddCallerSkip(1)
 
 	// 开启文件及行号
 	development := zap.Development()

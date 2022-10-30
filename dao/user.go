@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"fmt"
 	"gin-skeleton/entity"
 	"gin-skeleton/svc"
 )
@@ -18,5 +19,6 @@ func NewUserDao(svcCtx *svc.ServiceContext) *UserDao {
 func (that *UserDao) GetUserInfo(userId uint) *entity.User {
 	var user entity.User
 	that.db.First(&user, userId)
+	fmt.Println(that.db)
 	return &user
 }

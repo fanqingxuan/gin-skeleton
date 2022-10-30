@@ -30,7 +30,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		},
 	})
 	if err != nil {
-		fmt.Println(DSN)
 		panic(err)
 	}
 
