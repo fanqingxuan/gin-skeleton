@@ -31,6 +31,10 @@ func (that *UserLogic) Say(req *types.UserIndexReq) (resp *types.UserIndexReply,
 func (that *UserLogic) GetUserInfo(req *types.UserInfoReq) (resp *types.UserInfoReply, err error) {
 
 	result := that.redis.Get("user:" + string(req.UserId))
+	that.log.Debug("debug 关键字", "这是debug消息")
+	that.log.Info("info 关键字", "这是info消息")
+	that.log.Warn("warn 关键字", "这是warn消息")
+	that.log.Error("error 关键字", req)
 	if err := result.Err(); err != nil && err != redis.Nil {
 		return nil, err
 	}

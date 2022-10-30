@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gin-skeleton/config"
 	"gin-skeleton/handler"
+	"gin-skeleton/middleware"
 	"gin-skeleton/svc"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,7 @@ func main() {
 
 	server := gin.New()
 	ctx := svc.NewServiceContext(c)
-
+	middleware.RegisterGlobalMiddlewares(server)
 	handler.RegisterHandlers(server, ctx)
 
 	fmt.Printf("Starting server at localhost%s...\n", c.App.Port)

@@ -15,6 +15,7 @@ type ServiceContext struct {
 	Response *Response
 	Redis    *redis.Client
 	DB       *gorm.DB
+	Log      *Log
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -32,16 +33,19 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		fmt.Println(DSN)
 		panic(err)
 	}
+
+	var Redis = redis.NewClient(&redis.Options{
+		Network:  c.Redis.Network,
+		Addr:     c.Redis.Addr,
+		Username: c.Redis.Username,
+		Password: c.Redis.Password,
+		DB:       c.Redis.DB,
+	})
 	return &ServiceContext{
 		Config:   c,
 		Response: NewResponse(),
-		Redis: redis.NewClient(&redis.Options{
-			Network:  c.Redis.Network,
-			Addr:     c.Redis.Addr,
-			Username: c.Redis.Username,
-			Password: c.Redis.Password,
-			DB:       c.Redis.DB,
-		}),
-		DB: DB,
+		Redis:    Redis,
+		DB:       DB,
+		Log:      NewLog("app/", c.Log.Level),
 	}
 }

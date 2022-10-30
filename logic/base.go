@@ -9,6 +9,7 @@ type Logic struct {
 	ctx   context.Context
 	svc   *svc.ServiceContext
 	redis *svc.AWRedis
+	log   *svc.Log
 }
 
 func NewLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Logic {
@@ -16,5 +17,6 @@ func NewLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Logic {
 		ctx:   ctx,
 		svc:   svcCtx,
 		redis: svc.NewRedis(ctx, svcCtx.Redis),
+		log:   svcCtx.Log.WithContext(ctx),
 	}
 }
