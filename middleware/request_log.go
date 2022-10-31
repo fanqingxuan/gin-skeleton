@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func accessLog(logger *svc.Log) gin.HandlerFunc {
+func requestLog(logger *svc.Log) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Request.ParseForm()
 		requestInfo := map[string]interface{}{

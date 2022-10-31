@@ -7,6 +7,7 @@ import (
 	"gin-skeleton/types"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/pkg/errors"
 )
 
 type UserLogic struct {
@@ -36,10 +37,13 @@ func (that *UserLogic) GetUserInfo(req *types.UserInfoReq) (resp *types.UserInfo
 	that.log.Warn("warn 关键字", "这是warn消息")
 	that.log.Error("error 关键字", req)
 	if err := result.Err(); err != nil && err != redis.Nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	if result.Val() == "" {
-		user := that.userDao.GetUserInfo(req.UserId)
+		user, err := that.userDao.GetUserInfo(req.UserId)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
 		if user != nil {
 			return &types.UserInfoReply{
 				Message: "hello:" + user.Username,

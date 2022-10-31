@@ -24,7 +24,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Password: c.Redis.Password,
 		DB:       c.Redis.DB,
 	})
-	log := NewLog("app/", c.Log.Level)
+	log := NewLog("app/", c.Log.Level, BusinessLogType)
 	return &ServiceContext{
 		Config:   c,
 		Response: NewResponse(),

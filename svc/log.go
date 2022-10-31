@@ -12,9 +12,34 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+type LogType int8
+
+const (
+	BusinessLogType LogType = iota - 1
+	RequestLogType
+	PanicLogType
+)
+
 type Log struct {
-	log *zap.Logger
-	ctx context.Context
+	log     *zap.Logger
+	ctx     context.Context
+	logtype LogType
+}
+
+func NewLog(logpath string, loglevel string, logtype LogType) *Log {
+	return &Log{
+		log:     initLogger("./logs/"+logpath, loglevel, logtype),
+		logtype: logtype,
+	}
+}
+
+func (that *Log) WithContext(ctx context.Context) *Log {
+	that.ctx = ctx
+	return &Log{
+		ctx:     ctx,
+		log:     that.log,
+		logtype: that.logtype,
+	}
 }
 
 func (that *Log) Debug(keywords string, message interface{}) {
@@ -48,29 +73,20 @@ func (that *Log) Printf(level zapcore.Level, keywords string, message interface{
 
 	traceId := that.ctx.Value("traceId")
 
-	s := fmt.Sprintf("%s\t%s\t%s", traceId, keywords, msg)
+	var s string
+	if that.logtype == BusinessLogType {
+		s = fmt.Sprintf("%s\t%s\t%s", traceId, keywords, msg)
+	} else {
+		s = fmt.Sprintf("%s\t%s", traceId, msg)
+	}
+
 	that.log.Log(level, s)
-}
-
-func NewLog(logpath string, loglevel string) *Log {
-	return &Log{
-		log: initLogger("./logs/"+logpath, loglevel),
-	}
-}
-
-func (that *Log) WithContext(ctx context.Context) *Log {
-	that.ctx = ctx
-	return &Log{
-		ctx: ctx,
-		log: that.log,
-	}
 }
 
 // logpath 日志文件路径
 // loglevel 日志级别
-func initLogger(logpath string, loglevel string) *zap.Logger {
+func initLogger(logpath string, loglevel string, logtype LogType) *zap.Logger {
 	// 日志分割
-	fmt.Println(time.Now())
 	hook, err := rotatelogs.New(
 		strings.Trim(logpath, "/")+"/%F.log",
 		rotatelogs.WithMaxAge(30*24*time.Hour),
@@ -106,14 +122,19 @@ func initLogger(logpath string, loglevel string) *zap.Logger {
 		FunctionKey:   zapcore.OmitKey,
 		StacktraceKey: "stacktrace",
 		LineEnding:    zapcore.DefaultLineEnding,
-		EncodeLevel:   zapcore.CapitalLevelEncoder, // 小写编码器
+
 		EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 			enc.AppendString(t.Format("2006-01-02 15:04:05.000"))
 		},
-		EncodeDuration: zapcore.SecondsDurationEncoder, //
-		EncodeCaller:   zapcore.ShortCallerEncoder,     // 全路径编码器
+		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeName:     zapcore.FullNameEncoder,
 	}
+
+	if logtype == BusinessLogType {
+		encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
+		encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	}
+
 	// 设置日志级别
 	atomicLevel := zap.NewAtomicLevel()
 	atomicLevel.SetLevel(level)
@@ -125,12 +146,10 @@ func initLogger(logpath string, loglevel string) *zap.Logger {
 	)
 	// 开启开发模式，堆栈跟踪
 	caller := zap.AddCaller()
-	skip_caller := zap.AddCallerSkip(1)
+	skip_caller := zap.AddCallerSkip(2)
 
-	// 开启文件及行号
-	development := zap.Development()
 	// 构造日志
-	l := zap.New(core, caller, skip_caller, development)
+	l := zap.New(core, caller, skip_caller)
 	defer l.Sync()
 	return l
 }

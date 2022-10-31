@@ -2,15 +2,16 @@ package svc
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"gin-skeleton/config"
 	"time"
 
+	"github.com/pkg/errors"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
+	"gorm.io/gorm/utils"
 )
 
 func NewDB(c config.Config, log *Log) *gorm.DB {
@@ -34,7 +35,7 @@ func newDBLogger(c config.Config, log *Log) logger.Interface {
 	var (
 		traceStr     = "[%.3fms] [rows:%v] %s"
 		traceWarnStr = "%s[%.3fms] [rows:%v] %s"
-		traceErrStr  = "%s[%.3fms] [rows:%v] %s"
+		traceErrStr  = "%s%s%s"
 	)
 	return &gormLogger{
 		SlowThreshold: time.Duration(c.DB.SlowThreshold * int64(time.Second)),
@@ -79,14 +80,9 @@ func (l *gormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 	elapsed := time.Since(begin)
 	switch {
 	case err != nil && !errors.Is(err, gorm.ErrRecordNotFound):
-		sql, rows := fc()
-		message := ""
-		if rows == -1 {
-			message = fmt.Sprintf(l.traceErrStr, err, float64(elapsed.Nanoseconds())/1e6, "-", sql)
-		} else {
-			message = fmt.Sprintf(l.traceErrStr, err, float64(elapsed.Nanoseconds())/1e6, rows, sql)
-		}
-		panic(message)
+		sql, _ := fc()
+		message := fmt.Sprintf(l.traceErrStr, fmt.Sprintf("%s\r\n", err), fmt.Sprintf("File: %s\r\n", utils.FileWithLineNum()), fmt.Sprintf("Executed SQL: %s", sql))
+		panic(errors.WithStack(errors.New(message)))
 	case elapsed > time.Duration(l.SlowThreshold)*time.Second && l.SlowThreshold != 0:
 		sql, rows := fc()
 		slowLog := fmt.Sprintf("SLOW SQL >= %v", time.Duration(l.SlowThreshold*time.Second).Seconds())
