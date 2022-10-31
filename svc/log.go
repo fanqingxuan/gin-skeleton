@@ -60,16 +60,19 @@ func NewLog(logpath string, loglevel string) *Log {
 
 func (that *Log) WithContext(ctx context.Context) *Log {
 	that.ctx = ctx
-	return that
+	return &Log{
+		ctx: ctx,
+		log: that.log,
+	}
 }
 
 // logpath 日志文件路径
 // loglevel 日志级别
 func initLogger(logpath string, loglevel string) *zap.Logger {
-	fmt.Println(logpath, loglevel)
 	// 日志分割
+	fmt.Println(time.Now())
 	hook, err := rotatelogs.New(
-		strings.Trim(logpath, "/")+"/%Y-%m-%d.log",
+		strings.Trim(logpath, "/")+"/%F.log",
 		rotatelogs.WithMaxAge(30*24*time.Hour),
 	)
 	if err != nil {

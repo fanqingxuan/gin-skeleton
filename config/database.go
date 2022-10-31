@@ -9,4 +9,5 @@ type DB struct {
 	Charset       string `yaml:"Charset"`
 	TablePrefix   string `yaml:"TablePrefix"`
 	SingularTable bool   `yaml:"SingularTable"`
+	SlowThreshold int64  `yaml:"SlowThreshold"`
 }

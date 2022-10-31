@@ -17,7 +17,7 @@ type UserLogic struct {
 func NewUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserLogic {
 	return &UserLogic{
 		Logic:   *NewLogic(ctx, svcCtx),
-		userDao: dao.NewUserDao(svcCtx),
+		userDao: dao.NewUserDao(ctx, svcCtx),
 	}
 }
 

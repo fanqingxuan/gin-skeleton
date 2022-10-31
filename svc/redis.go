@@ -242,7 +242,31 @@ func NewRedis(ctx context.Context, client *redis.Client) *AWRedis {
 		ctx:    ctx,
 		client: client,
 	}
+	client.AddHook(&CheckServerStatusHook{})
 	return redis
+}
+
+type CheckServerStatusHook struct {
+	redis.Hook
+}
+
+func (h *CheckServerStatusHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
+	return ctx, nil
+}
+func (h *CheckServerStatusHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
+	err := cmd.Err()
+	if err != nil && err != redis.Nil {
+		panic(err.Error())
+
+	}
+	return err
+}
+
+func (h *CheckServerStatusHook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
+	return ctx, nil
+}
+func (h *CheckServerStatusHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) error {
+	return nil
 }
 
 func (that *AWRedis) Command() *redis.CommandsInfoCmd {
