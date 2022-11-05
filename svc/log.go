@@ -2,13 +2,13 @@ package svc
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
+	jsoniter "github.com/json-iterator/go"
 	rotatelogs "github.com/lestrrat/go-file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -76,6 +76,7 @@ func (that *Log) Printf(level zapcore.Level, keywords string, message interface{
 	case string:
 		msg = message.(string)
 	default:
+		var json = jsoniter.ConfigCompatibleWithStandardLibrary
 		s, err := json.Marshal(message)
 		if err != nil {
 			panic("write log error:" + err.Error())

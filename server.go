@@ -6,13 +6,11 @@ import (
 	"gin-skeleton/handler"
 	"gin-skeleton/middleware"
 	"gin-skeleton/svc"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	time.LoadLocation("")
 	var c config.Config
 	svc.MustLoad("./.env.yaml", &c)
 	if c.Debug {
