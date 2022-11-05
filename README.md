@@ -34,11 +34,11 @@
 ### 目录结构
 
 - config -配置
-- handler -业务控制器&路由配置
+- handler -业务控制器&路由配置,可以根据不同的子目录拆分模块handler
 - logs -日志目录
 - middleware -中间件目录
 - entity -表模型目录
-- logic -业务逻辑目录
+- logic -业务逻辑目录,可以根据不同的子目录拆分模块
 - dao -数据库操作
 - svc -定义了log、db、redis等基础服务组件的封装
 - types 定义了请求参数的数据类型
