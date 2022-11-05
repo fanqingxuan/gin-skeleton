@@ -5,6 +5,7 @@ import (
 	"gin-skeleton/dao"
 	"gin-skeleton/svc"
 	"gin-skeleton/types"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
@@ -30,7 +31,7 @@ func (that *UserLogic) Say(req *types.UserIndexReq) (resp *types.UserIndexReply,
 }
 
 func (that *UserLogic) GetUserInfo(req *types.UserInfoReq) (resp *types.UserInfoReply, err error) {
-
+	that.redis.Expire("test", time.Nanosecond/1000)
 	result := that.redis.Get("user:" + string(req.UserId))
 	that.log.Debug("debug 关键字", "这是debug消息")
 	that.log.Info("info 关键字", "这是info消息")

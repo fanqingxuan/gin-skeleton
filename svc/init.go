@@ -16,6 +16,7 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
+	log := NewLog("app/", c.Log.Level, BusinessLogType)
 
 	var Redis = redis.NewClient(&redis.Options{
 		Network:  c.Redis.Network,
@@ -24,7 +25,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Password: c.Redis.Password,
 		DB:       c.Redis.DB,
 	})
-	log := NewLog("app/", c.Log.Level, BusinessLogType)
 	return &ServiceContext{
 		Config:   c,
 		Response: NewResponse(),

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -21,27 +23,37 @@ const (
 )
 
 type Log struct {
-	log     *zap.Logger
-	ctx     context.Context
-	logtype LogType
+	log         *zap.Logger
+	ctx         context.Context
+	logtype     LogType
+	caller_skip int
 }
 
 func NewLog(logpath string, loglevel string, logtype LogType) *Log {
 	return &Log{
-		log:     initLogger("./logs/"+logpath, loglevel, logtype),
-		logtype: logtype,
+		log:         initLogger("./logs/"+logpath, loglevel, logtype),
+		logtype:     logtype,
+		caller_skip: 2,
 	}
 }
 
 func (that *Log) WithContext(ctx context.Context) *Log {
 	that.ctx = ctx
 	return &Log{
-		ctx:     ctx,
-		log:     that.log,
-		logtype: that.logtype,
+		ctx:         ctx,
+		log:         that.log,
+		logtype:     that.logtype,
+		caller_skip: that.caller_skip,
 	}
 }
-
+func (that *Log) WithCaller(skip int) *Log {
+	return &Log{
+		ctx:         that.ctx,
+		log:         that.log,
+		logtype:     that.logtype,
+		caller_skip: skip,
+	}
+}
 func (that *Log) Debug(keywords string, message interface{}) {
 	that.Printf(zap.DebugLevel, keywords, message)
 }
@@ -75,7 +87,14 @@ func (that *Log) Printf(level zapcore.Level, keywords string, message interface{
 
 	var s string
 	if that.logtype == BusinessLogType {
-		s = fmt.Sprintf("%s\t%s\t%s", traceId, keywords, msg)
+		var linenum string
+		_, file, line, ok := runtime.Caller(that.caller_skip)
+		if ok {
+			linenum = trimmedPath(file + ":" + strconv.FormatInt(int64(line), 10))
+		} else {
+			panic("runtime caller error")
+		}
+		s = fmt.Sprintf("%s\t%s\t%s\t%s", linenum, traceId, keywords, msg)
 	} else {
 		s = fmt.Sprintf("%s\t%s", traceId, msg)
 	}
@@ -88,7 +107,7 @@ func (that *Log) Printf(level zapcore.Level, keywords string, message interface{
 func initLogger(logpath string, loglevel string, logtype LogType) *zap.Logger {
 	// 日志分割
 	hook, err := rotatelogs.New(
-		strings.Trim(logpath, "/")+"/%F.log",
+		strings.Trim(logpath, "/")+"/%F",
 		rotatelogs.WithMaxAge(30*24*time.Hour),
 	)
 	if err != nil {
@@ -144,12 +163,9 @@ func initLogger(logpath string, loglevel string, logtype LogType) *zap.Logger {
 		write,
 		level,
 	)
-	// 开启开发模式，堆栈跟踪
-	caller := zap.AddCaller()
-	skip_caller := zap.AddCallerSkip(2)
 
 	// 构造日志
-	l := zap.New(core, caller, skip_caller)
+	l := zap.New(core)
 	defer l.Sync()
 	return l
 }

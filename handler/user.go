@@ -34,7 +34,7 @@ func UserInfoHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 		var req types.UserInfoReq
 		if err := ctx.ShouldBind(&req); err != nil {
 			svcCtx.Log.WithContext(ctx).Error("Parse Error", fmt.Sprintf("%+v", err))
-			ctx.JSON(http.StatusOK, svcCtx.Response.Error(err.Error()))
+			ctx.JSON(http.StatusOK, svcCtx.Response.WithContext(ctx).Error(err.Error()))
 			return
 		}
 
@@ -42,9 +42,9 @@ func UserInfoHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 		resp, err := userLogic.GetUserInfo(&req)
 		if err != nil {
 			svcCtx.Log.WithContext(ctx).Error("err", fmt.Sprintf("%+v", err))
-			ctx.JSON(http.StatusOK, svcCtx.Response.Error(err.Error()))
+			ctx.JSON(http.StatusOK, svcCtx.Response.WithContext(ctx).Error(err.Error()))
 		} else {
-			ctx.JSON(http.StatusOK, svcCtx.Response.Success(resp))
+			ctx.JSON(http.StatusOK, svcCtx.Response.WithContext(ctx).Success(resp))
 		}
 	}
 }

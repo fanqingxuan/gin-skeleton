@@ -35,22 +35,20 @@ func newDBLogger(c config.Config, log *Log) logger.Interface {
 	var (
 		traceStr     = "[%.3fms] [rows:%v] %s"
 		traceWarnStr = "%s[%.3fms] [rows:%v] %s"
-		traceErrStr  = "%s%s%s"
 	)
 	return &gormLogger{
 		SlowThreshold: time.Duration(c.DB.SlowThreshold * int64(time.Second)),
 		traceStr:      traceStr,
 		traceWarnStr:  traceWarnStr,
-		traceErrStr:   traceErrStr,
 		logger:        log,
 	}
 }
 
 type gormLogger struct {
-	SlowThreshold                       time.Duration
-	infoStr, warnStr, errStr            string
-	traceStr, traceErrStr, traceWarnStr string
-	logger                              *Log
+	SlowThreshold            time.Duration
+	infoStr, warnStr, errStr string
+	traceStr, traceWarnStr   string
+	logger                   *Log
 	logger.Interface
 }
 
@@ -81,8 +79,8 @@ func (l *gormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 	switch {
 	case err != nil && !errors.Is(err, gorm.ErrRecordNotFound):
 		sql, _ := fc()
-		message := fmt.Sprintf(l.traceErrStr, fmt.Sprintf("%s\r\n", err), fmt.Sprintf("File: %s\r\n", utils.FileWithLineNum()), fmt.Sprintf("Executed SQL: %s", sql))
-		panic(errors.WithStack(errors.New(message)))
+		message := fmt.Sprintf("database error:%s in file %s, Executed SQL:%s ", err, trimmedPath(utils.FileWithLineNum()), sql)
+		panic(message)
 	case elapsed > time.Duration(l.SlowThreshold)*time.Second && l.SlowThreshold != 0:
 		sql, rows := fc()
 		slowLog := fmt.Sprintf("SLOW SQL >= %v", time.Duration(l.SlowThreshold*time.Second).Seconds())
@@ -92,7 +90,7 @@ func (l *gormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 		} else {
 			message = fmt.Sprintf(l.traceWarnStr, slowLog, float64(elapsed.Nanoseconds())/1e6, rows, sql)
 		}
-		l.logger.WithContext(ctx).Warn("slow sql", message)
+		l.logger.WithContext(ctx).WithCaller(5).Warn("slow sql", message)
 	default:
 		sql, rows := fc()
 		message := ""
@@ -101,6 +99,6 @@ func (l *gormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 		} else {
 			message = fmt.Sprintf(l.traceStr, float64(elapsed.Nanoseconds())/1e6, rows, sql)
 		}
-		l.logger.WithContext(ctx).Debug("sql", message)
+		l.logger.WithContext(ctx).WithCaller(5).Debug("sql", message)
 	}
 }

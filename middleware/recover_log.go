@@ -14,7 +14,7 @@ func recoverLog(logger *svc.Log, resp *svc.Response) gin.HandlerFunc {
 			if err := recover(); err != nil {
 				tx_logger := logger.WithContext(ctx)
 				tx_logger.Error("", fmt.Sprintf("%+v", err))
-				ctx.JSON(http.StatusInternalServerError, resp.ErrorWithCode(http.StatusInternalServerError, "服务器内部错误"))
+				ctx.JSON(http.StatusInternalServerError, resp.WithContext(ctx).ErrorWithCode(http.StatusInternalServerError, "服务器内部错误"))
 				ctx.Abort()
 				return
 			}

@@ -2,6 +2,8 @@ package svc
 
 import (
 	"context"
+	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -256,7 +258,13 @@ func (h *CheckServerStatusHook) BeforeProcess(ctx context.Context, cmd redis.Cmd
 func (h *CheckServerStatusHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	err := cmd.Err()
 	if err != nil && err != redis.Nil {
-		panic(err.Error())
+		_, file, line, ok := runtime.Caller(5)
+		if ok {
+			linenum := trimmedPath(file + ":" + strconv.FormatInt(int64(line), 10))
+			panic("redis error:" + err.Error() + " in file " + linenum)
+		} else {
+			panic(err.Error())
+		}
 
 	}
 	return err
