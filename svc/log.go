@@ -107,7 +107,7 @@ func (that *Log) Printf(level zapcore.Level, keywords string, message interface{
 func initLogger(logpath string, loglevel string, logtype LogType) *zap.Logger {
 	// 日志分割
 	hook, err := rotatelogs.New(
-		strings.Trim(logpath, "/")+"/%F",
+		strings.Trim(logpath, "/")+"/%F.log",
 		rotatelogs.WithMaxAge(30*24*time.Hour),
 	)
 	if err != nil {
