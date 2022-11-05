@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"gin-skeleton/handler/user"
 	"gin-skeleton/svc"
 	"net/http"
 
@@ -10,11 +11,11 @@ import (
 func RegisterHandlers(r *gin.Engine, svcCtx *svc.ServiceContext) {
 
 	r.NoRoute(func(ctx *gin.Context) {
-		ctx.JSON(http.StatusNotFound, svcCtx.Response.ErrorWithCode(http.StatusNotFound, "页面不存在"))
+		ctx.JSON(http.StatusNotFound, svcCtx.Response.WithContext(ctx).ErrorWithCode(http.StatusNotFound, "页面不存在"))
 		return
 	})
-	r.POST("/user", UserIndexHandler(svcCtx))
+	r.GET("/user", user.IndexHandler(svcCtx))
 
-	r.GET("/userinfo", UserInfoHandler(svcCtx))
+	r.GET("/userinfo", user.InfoHandler(svcCtx))
 
 }

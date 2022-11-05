@@ -6,17 +6,17 @@ import (
 )
 
 type Logic struct {
-	ctx   context.Context
-	svc   *svc.ServiceContext
-	redis *svc.AWRedis
-	log   *svc.Log
+	Ctx   context.Context
+	Svc   *svc.ServiceContext
+	Redis *svc.AWRedis
+	Log   *svc.Log
 }
 
 func NewLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Logic {
 	return &Logic{
-		ctx:   ctx,
-		svc:   svcCtx,
-		redis: svc.NewRedis(ctx, svcCtx.Redis),
-		log:   svcCtx.Log.WithContext(ctx),
+		Ctx:   ctx,
+		Svc:   svcCtx,
+		Redis: svc.NewRedis(ctx, svcCtx.Redis),
+		Log:   svcCtx.Log.WithContext(ctx),
 	}
 }
