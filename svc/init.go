@@ -8,11 +8,12 @@ import (
 )
 
 type ServiceContext struct {
-	Config   config.Config
-	Response *Response
-	Redis    *redis.Client
-	DB       *gorm.DB
-	Log      *Log
+	Config       config.Config
+	Response     *Response
+	Redis        *redis.Client
+	DB           *gorm.DB
+	Log          *Log
+	LocalStorage *LocalStorage
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -26,10 +27,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		DB:       c.Redis.DB,
 	})
 	return &ServiceContext{
-		Config:   c,
-		Response: NewResponse(),
-		Redis:    Redis,
-		Log:      log,
-		DB:       NewDB(c, log),
+		Config:       c,
+		Response:     NewResponse(),
+		Redis:        Redis,
+		Log:          log,
+		DB:           NewDB(c, log),
+		LocalStorage: NewLocalStorage(c),
 	}
 }
