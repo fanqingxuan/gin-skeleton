@@ -67,3 +67,7 @@ func (that *LocalStorage) DeleteExpired() {
 func (that *LocalStorage) Flush() {
 	that.cache.Flush()
 }
+
+func (that *LocalStorage) Items() map[string]cache.Item {
+	return that.cache.Items()
+}
