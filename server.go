@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"gin-skeleton/config"
+	"gin-skeleton/cron"
 	"gin-skeleton/handler"
 	"gin-skeleton/middleware"
 	"gin-skeleton/svc"
@@ -23,6 +24,7 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 	middleware.RegisterGlobalMiddlewares(server)
 	handler.RegisterHandlers(server, ctx)
+	cron.RegisterCronJobs(ctx)
 
 	fmt.Printf("Starting server at localhost%s...\n", c.App.Port)
 	server.Run(":8000")

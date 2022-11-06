@@ -16,6 +16,17 @@ type ServiceContext struct {
 	LocalStorage *LocalStorage
 }
 
+func (that *ServiceContext) WithLog(log *Log) *ServiceContext {
+	return &ServiceContext{
+		Config:       that.Config,
+		Response:     that.Response,
+		Redis:        that.Redis,
+		DB:           NewDB(that.Config, log),
+		Log:          log,
+		LocalStorage: that.LocalStorage,
+	}
+}
+
 func NewServiceContext(c config.Config) *ServiceContext {
 	log := NewLog("app/", c.Log.Level, BusinessLogType)
 

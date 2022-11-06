@@ -85,7 +85,10 @@ func (that *Log) Printf(level zapcore.Level, keywords string, message interface{
 	}
 
 	traceId := that.ctx.Value("traceId")
-
+	switch traceId.(type) {
+	case nil:
+		traceId = ""
+	}
 	var s string
 	if that.logtype == BusinessLogType {
 		var linenum string
@@ -97,9 +100,8 @@ func (that *Log) Printf(level zapcore.Level, keywords string, message interface{
 		}
 		s = fmt.Sprintf("%s\t%s\t%s\t%s", linenum, traceId, keywords, msg)
 	} else {
-		s = fmt.Sprintf("%s\t%s", traceId, msg)
+		s = fmt.Sprintf("%s\t%s", fmt.Sprintf("%s", traceId), msg)
 	}
-
 	that.log.Log(level, s)
 }
 
