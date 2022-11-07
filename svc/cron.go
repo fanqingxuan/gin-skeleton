@@ -3,7 +3,8 @@ package svc
 import (
 	"context"
 	"fmt"
-	"strings"
+	"reflect"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
@@ -43,11 +44,19 @@ func (that *Cron) AddFunc(spec string, cmd JobFunc) (cron.EntryID, error) {
 func (that *Cron) AddJob(spec string, cmd Job) (cron.EntryID, error) {
 	return that.cron.AddFunc(spec, func() {
 		c := context.WithValue(context.Background(), "traceId", uuid.NewV4())
+
+		logger := that.logger.WithContext(c)
+		jobName := reflect.TypeOf(cmd).String()
+		start := time.Now()
+		logger.Info("before", fmt.Sprintf("spec:%s, jobName:%s, start...", spec, jobName))
 		cmd.Run(c)
+		elapsed := time.Now().Sub(start).Seconds()
+		logger.Info("after", fmt.Sprintf("spec:%s, jobName:%s, finish,cost:%fs", spec, jobName, elapsed))
 	})
 }
 
 func (that *Cron) Start() {
+	func (that *Cron) Start() {
 	that.cron.Start()
 }
 
@@ -62,24 +71,8 @@ func NewCronLogger(logger *Log) *CronLogger {
 }
 
 func (that *CronLogger) Info(msg string, keysAndValues ...interface{}) {
-	fmt.Println(msg)
 }
 
 func (that *CronLogger) Error(err error, msg string, keysAndValues ...interface{}) {
 	that.logger.Error(msg, fmt.Sprintf("%+v", errors.WithStack(err)))
-}
-
-func formatString(numKeysAndValues int) string {
-	var sb strings.Builder
-	sb.WriteString("%s")
-	if numKeysAndValues > 0 {
-		sb.WriteString(", ")
-	}
-	for i := 0; i < numKeysAndValues/2; i++ {
-		if i > 0 {
-			sb.WriteString(", ")
-		}
-		sb.WriteString("%v=%v")
-	}
-	return sb.String()
 }
