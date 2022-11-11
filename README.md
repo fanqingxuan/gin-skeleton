@@ -31,8 +31,8 @@
   - cron 定时任务业务日志
   - cron_panic 定时任务产生的panic日志
 
-- 集成gopkg.in/yaml.v3，用户解析我们的配置项
-- 集成go-cache,用户本地缓存
+- 集成gopkg.in/yaml.v3，用于解析yaml文件的配置项
+- 集成go-cache,用于本地缓存
 - 集成robfig/cron，用于定时任务
 - 集成pkg/errors,用于更好的error体验
 
