@@ -56,7 +56,6 @@ func (that *Cron) AddJob(spec string, cmd Job) (cron.EntryID, error) {
 }
 
 func (that *Cron) Start() {
-	func (that *Cron) Start() {
 	that.cron.Start()
 }
 
