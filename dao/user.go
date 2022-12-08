@@ -1,21 +1,19 @@
 package dao
 
 import (
-	"context"
 	"gin-skeleton/entity"
-	"gin-skeleton/svc"
 
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
 type UserDao struct {
-	Dao
+	*Dao
 }
 
-func NewUserDao(ctx context.Context, svcCtx *svc.ServiceContext) *UserDao {
+func NewUserDao(db *gorm.DB) *UserDao {
 	return &UserDao{
-		Dao: *NewDao(ctx, svcCtx),
+		Dao: NewDao(db),
 	}
 }
 

@@ -13,12 +13,9 @@ func RegisterCronJobs(sctx *svc.ServiceContext) {
 	c := svc.NewCron(svcCtx.Log, recoverLog)
 
 	c.AddJob("@every 10s", NewRemoveExpiredCacheKey(sctx))
-	// c.AddFunc("@every 1s", func(ctx context.Context) {
-	// 	userDao := dao.NewUserDao(ctx, svcCtx)
-	// 	userDao.GetUserInfo(3)
-	// })
-	c.AddFunc("@hourly", func(ctx context.Context) {
-		userDao := dao.NewUserDao(ctx, svcCtx)
+
+	c.AddFunc("@every 1s", func(ctx context.Context) {
+		userDao := dao.NewUserDao(svcCtx.WithContext(ctx).DB)
 		userDao.GetUserInfo(2)
 	})
 

@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"gin-skeleton/dao"
 	"gin-skeleton/logic"
 	"gin-skeleton/svc"
@@ -13,14 +12,14 @@ import (
 )
 
 type InfoLogic struct {
-	logic.Logic
-	userDao dao.UserDao
+	*logic.Logic
+	userDao *dao.UserDao
 }
 
-func NewInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *InfoLogic {
+func NewInfoLogic(svcCtx *svc.ServiceContext) *InfoLogic {
 	return &InfoLogic{
-		Logic:   *logic.NewLogic(ctx, svcCtx),
-		userDao: *dao.NewUserDao(ctx, svcCtx),
+		Logic:   logic.NewLogic(svcCtx),
+		userDao: dao.NewUserDao(svcCtx.DB),
 	}
 }
 

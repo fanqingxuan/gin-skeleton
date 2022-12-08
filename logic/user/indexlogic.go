@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"gin-skeleton/logic"
 	"gin-skeleton/svc"
 	"gin-skeleton/types"
@@ -11,9 +10,9 @@ type IndexLogic struct {
 	logic.Logic
 }
 
-func NewIndexLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IndexLogic {
+func NewIndexLogic(svcCtx *svc.ServiceContext) *IndexLogic {
 	return &IndexLogic{
-		Logic: *logic.NewLogic(ctx, svcCtx),
+		Logic: *logic.NewLogic(svcCtx),
 	}
 }
 

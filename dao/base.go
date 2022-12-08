@@ -1,20 +1,15 @@
 package dao
 
 import (
-	"context"
-	"gin-skeleton/svc"
-
 	"gorm.io/gorm"
 )
 
 type Dao struct {
-	db  *gorm.DB
-	ctx context.Context
+	db *gorm.DB
 }
 
-func NewDao(ctx context.Context, svcCtx *svc.ServiceContext) *Dao {
+func NewDao(db *gorm.DB) *Dao {
 	return &Dao{
-		db:  svcCtx.DB.WithContext(ctx),
-		ctx: ctx,
+		db: db,
 	}
 }

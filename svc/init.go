@@ -1,6 +1,7 @@
 package svc
 
 import (
+	"context"
 	"gin-skeleton/config"
 
 	"github.com/go-redis/redis/v8"
@@ -8,16 +9,30 @@ import (
 )
 
 type ServiceContext struct {
+	Ctx          context.Context
 	Config       config.Config
 	Response     *Response
-	Redis        *redis.Client
+	Redis        *AWRedis
 	DB           *gorm.DB
 	Log          *Log
 	LocalStorage *LocalStorage
 }
 
+func (that *ServiceContext) WithContext(ctx context.Context) *ServiceContext {
+	return &ServiceContext{
+		Ctx:          ctx,
+		Config:       that.Config,
+		Response:     that.Response.WithContext(ctx),
+		Redis:        NewRedis(ctx, that.Redis.client),
+		DB:           that.DB.WithContext(ctx),
+		Log:          that.Log.WithContext(ctx),
+		LocalStorage: that.LocalStorage,
+	}
+}
+
 func (that *ServiceContext) WithLog(log *Log) *ServiceContext {
 	return &ServiceContext{
+		Ctx:          that.Ctx,
 		Config:       that.Config,
 		Response:     that.Response,
 		Redis:        that.Redis,
@@ -40,7 +55,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:       c,
 		Response:     NewResponse(),
-		Redis:        Redis,
+		Redis:        NewRedis(context.Background(), Redis),
 		Log:          log,
 		DB:           NewDB(c, log),
 		LocalStorage: NewLocalStorage(c),
