@@ -1,10 +1,10 @@
 package cron
 
 import (
-	"context"
 	"fmt"
+	"gin-skeleton/svc"
 )
 
-func SampleFunc(ctx context.Context) {
-	fmt.Println(ctx.Value("traceId"))
+func SampleFunc(svcCtx *svc.ServiceContext) {
+	fmt.Println(svcCtx.Ctx.Value("traceId"))
 }

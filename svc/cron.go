@@ -13,27 +13,29 @@ import (
 
 type Cron struct {
 	cron   *cron.Cron
-	logger *Log
+	svcCtx *ServiceContext
 }
 
-type JobFunc func(context.Context)
+type JobFunc func(*ServiceContext)
 
-func (f JobFunc) Run(ctx context.Context) { f(ctx) }
+func (f JobFunc) Run(svcCtx *ServiceContext) { f(svcCtx) }
 
 type Job interface {
-	Run(context.Context)
+	Run(*ServiceContext)
 }
 
-func NewCron(logger, recoverlogger *Log) *Cron {
+func NewCron(svcCtx *ServiceContext) *Cron {
+	ctx := svcCtx.WithLog(NewLog("cron/", svcCtx.Config.Level, BusinessLogType))
+	recoverLog := NewLog("cron_panic/", svcCtx.Config.Level, PanicLogType)
 	c := cron.New(
 		cron.WithSeconds(),
 		cron.WithChain(
-			cron.Recover(NewCronLogger(recoverlogger.WithContext(context.Background()))),
+			cron.Recover(NewCronLogger(recoverLog.WithContext(context.Background()))),
 		),
 	)
 	return &Cron{
 		cron:   c,
-		logger: logger,
+		svcCtx: ctx,
 	}
 }
 
@@ -45,13 +47,13 @@ func (that *Cron) AddJob(spec string, cmd Job) (cron.EntryID, error) {
 	return that.cron.AddFunc(spec, func() {
 		c := context.WithValue(context.Background(), "traceId", uuid.NewV4())
 
-		logger := that.logger.WithContext(c)
+		ctx := that.svcCtx.WithContext(c)
 		jobName := reflect.TypeOf(cmd).String()
 		start := time.Now()
-		logger.Info("before", fmt.Sprintf("spec:%s, jobName:%s, start...", spec, jobName))
-		cmd.Run(c)
+		ctx.Log.Info("before", fmt.Sprintf("spec:%s, jobName:%s, start...", spec, jobName))
+		cmd.Run(ctx)
 		elapsed := time.Now().Sub(start).Seconds()
-		logger.Info("after", fmt.Sprintf("spec:%s, jobName:%s, finish,cost:%fs", spec, jobName, elapsed))
+		ctx.Log.Info("after", fmt.Sprintf("spec:%s, jobName:%s, finish,cost:%fs", spec, jobName, elapsed))
 	})
 }
 

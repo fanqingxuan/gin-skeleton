@@ -21,10 +21,10 @@ func main() {
 	}
 
 	server := gin.New()
-	ctx := svc.NewServiceContext(c)
+	svcCtx := svc.NewServiceContext(c)
 	middleware.RegisterGlobalMiddlewares(server)
-	handler.RegisterHandlers(server, ctx)
-	cron.RegisterCronJobs(ctx)
+	handler.RegisterHandlers(server, svcCtx)
+	cron.RegisterCronJobs(svcCtx)
 
 	fmt.Printf("Starting server at localhost%s...\n", c.App.Port)
 	server.Run(":8000")

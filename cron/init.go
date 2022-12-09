@@ -1,21 +1,18 @@
 package cron
 
 import (
-	"context"
 	"gin-skeleton/dao"
 	"gin-skeleton/svc"
 )
 
-func RegisterCronJobs(sctx *svc.ServiceContext) {
+func RegisterCronJobs(svcCtx *svc.ServiceContext) {
 
-	svcCtx := sctx.WithLog(svc.NewLog("cron/", sctx.Config.Level, svc.BusinessLogType))
-	recoverLog := svc.NewLog("cron_panic/", sctx.Config.Level, svc.PanicLogType)
-	c := svc.NewCron(svcCtx.Log, recoverLog)
+	c := svc.NewCron(svcCtx)
 
-	c.AddJob("@every 10s", NewRemoveExpiredCacheKey(sctx))
+	c.AddJob("@every 10s", NewRemoveExpiredCacheKey())
 
-	c.AddFunc("@every 1s", func(ctx context.Context) {
-		userDao := dao.NewUserDao(svcCtx.WithContext(ctx).DB)
+	c.AddFunc("@every 1s", func(svcCtx *svc.ServiceContext) {
+		userDao := dao.NewUserDao(svcCtx.DB)
 		userDao.GetUserInfo(2)
 	})
 

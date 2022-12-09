@@ -1,21 +1,17 @@
 package cron
 
 import (
-	"context"
 	"fmt"
 	"gin-skeleton/svc"
 )
 
 type SampleJob struct {
-	svcCtx *svc.ServiceContext
 }
 
-func NewSampleJob(svcCtx *svc.ServiceContext) *SampleJob {
-	return &SampleJob{
-		svcCtx: svcCtx,
-	}
+func NewSampleJob() *SampleJob {
+	return &SampleJob{}
 }
 
-func (that *SampleJob) Run(ctx context.Context) {
-	fmt.Println(ctx.Value("traceId"))
+func (that *SampleJob) Run(svcCtx *svc.ServiceContext) {
+	fmt.Println(svcCtx.Ctx.Value("traceId"))
 }
