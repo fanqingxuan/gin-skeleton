@@ -9,36 +9,33 @@ import (
 )
 
 type ServiceContext struct {
-	Ctx          context.Context
-	Config       config.Config
-	Response     *Response
-	Redis        *AWRedis
-	DB           *gorm.DB
-	Log          *Log
-	LocalStorage *LocalStorage
+	Config   config.Config
+	Response *Response
+	Redis    *AWRedis
+	DB       *gorm.DB
+	Log      *Log
+	XCache   *XCache
 }
 
 func (that *ServiceContext) WithContext(ctx context.Context) *ServiceContext {
 	return &ServiceContext{
-		Ctx:          ctx,
-		Config:       that.Config,
-		Response:     that.Response.WithContext(ctx),
-		Redis:        NewRedis(ctx, that.Redis.client),
-		DB:           that.DB.WithContext(ctx),
-		Log:          that.Log.WithContext(ctx),
-		LocalStorage: that.LocalStorage,
+		Config:   that.Config,
+		Response: that.Response.WithContext(ctx),
+		Redis:    NewRedis(ctx, that.Redis.client),
+		DB:       that.DB.WithContext(ctx),
+		Log:      that.Log.WithContext(ctx),
+		XCache:   that.XCache,
 	}
 }
 
 func (that *ServiceContext) WithLog(log *Log) *ServiceContext {
 	return &ServiceContext{
-		Ctx:          that.Ctx,
-		Config:       that.Config,
-		Response:     that.Response,
-		Redis:        that.Redis,
-		DB:           NewDB(that.Config, log),
-		Log:          log,
-		LocalStorage: that.LocalStorage,
+		Config:   that.Config,
+		Response: that.Response,
+		Redis:    that.Redis,
+		DB:       NewDB(that.Config, log),
+		Log:      log,
+		XCache:   that.XCache,
 	}
 }
 
@@ -53,11 +50,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		DB:       c.Redis.DB,
 	})
 	return &ServiceContext{
-		Config:       c,
-		Response:     NewResponse(),
-		Redis:        NewRedis(context.Background(), Redis),
-		Log:          log,
-		DB:           NewDB(c, log),
-		LocalStorage: NewLocalStorage(c),
+		Config:   c,
+		Response: NewResponse(),
+		Redis:    NewRedis(context.Background(), Redis),
+		Log:      log,
+		DB:       NewDB(c, log),
+		XCache:   NewXCache(c),
 	}
 }

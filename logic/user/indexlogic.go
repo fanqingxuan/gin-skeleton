@@ -17,13 +17,13 @@ func NewIndexLogic(svcCtx *svc.ServiceContext) *IndexLogic {
 }
 
 func (that *IndexLogic) Say(req *types.UserIndexReq) (resp *types.UserIndexReply, err error) {
-	val, found := that.LocalStorage.Get(req.Name)
+	val, found := that.XCache.Get(req.Name)
 	var message string
 	if found {
 		message = val.(string) + " get value from cache"
 	} else {
 		message = req.Message
-		that.LocalStorage.Set(req.Name, req.Message)
+		that.XCache.Set(req.Name, req.Message)
 	}
 
 	return &types.UserIndexReply{

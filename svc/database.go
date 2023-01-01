@@ -28,6 +28,7 @@ func NewDB(c config.Config, log *Log) *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+	DB.Statement.RaiseErrorOnNotFound = true
 	return DB
 }
 
