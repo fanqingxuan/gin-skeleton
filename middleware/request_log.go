@@ -15,13 +15,13 @@ var defaultLogFormatter = func(param gin.LogFormatterParams) string {
 		param.Latency = param.Latency.Truncate(time.Second)
 	}
 
-	return fmt.Sprintf("%s\t%s\t%s\t%s\t%d\t%s\t%s\n",
-		param.ClientIP,
-		param.Method,
-		param.Path,
+	return fmt.Sprintf("%s\t%s\t%d\t%s\t%s\t%s\t%s\n",
 		param.Request.Proto,
+		param.Method,
 		param.StatusCode,
+		param.ClientIP,
 		param.Latency,
+		param.Path,
 		param.Request.UserAgent(),
 	)
 }

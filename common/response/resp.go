@@ -27,7 +27,7 @@ func NewDefault(ctx context.Context, data interface{}) *Response {
 }
 
 func NewMessageDefault(ctx context.Context, message string, data interface{}) *Response {
-	return New(ctx, 0, message, nil)
+	return New(ctx, 0, message, data)
 }
 
 func NewDefaultError(ctx context.Context, err error) *Response {
@@ -41,6 +41,5 @@ func NewCodeError(ctx context.Context, code int, err error) *Response {
 	default:
 		msg = "服务器内部错误"
 	}
-	fmt.Printf("%T", err)
 	return New(ctx, code, msg, nil)
 }

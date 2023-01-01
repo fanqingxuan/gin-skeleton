@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"gin-skeleton/common/errorx"
@@ -13,10 +14,12 @@ import (
 
 type IndexLogic struct {
 	logic.Logic
+	Log *svc.Log
 }
 
-func NewIndexLogic(svcCtx *svc.ServiceContext) *IndexLogic {
+func NewIndexLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IndexLogic {
 	return &IndexLogic{
+		Log:   svcCtx.Log.WithContext(ctx),
 		Logic: *logic.NewLogic(svcCtx),
 	}
 }
@@ -32,7 +35,7 @@ func (that *IndexLogic) Say(req *types.UserIndexReq) (resp *types.UserIndexReply
 			return nil, errorx.New("消息不能为空")
 		}
 		result := that.Redis.Get(req.Name)
-		if err = result.Err(); err != nil && err != redis.Nil {
+		if err = result.Err(); err != nil && !errors.Is(err, redis.Nil) {
 			that.Log.Error("获取cache错误key:"+req.Name, err)
 			return
 		}

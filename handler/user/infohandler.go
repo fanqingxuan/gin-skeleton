@@ -13,14 +13,16 @@ import (
 
 func InfoHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+
 		var req types.UserInfoReq
 		if err := ctx.ShouldBind(&req); err != nil {
+			svcCtx.Log.WithContext(ctx).Error("Handler ShouldBind Parse", err)
 			ctx.JSON(http.StatusOK, response.NewDefaultError(ctx, errorx.New(err.Error())))
 			return
 		}
 
-		userLogic := user.NewInfoLogic(ctx, svcCtx)
-		resp, err := userLogic.GetUserInfo(&req)
+		logic := user.NewInfoLogic(ctx, svcCtx)
+		resp, err := logic.GetUserInfo(&req)
 		if err != nil {
 			ctx.JSON(http.StatusOK, response.NewDefaultError(ctx, err))
 		} else {

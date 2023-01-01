@@ -75,6 +75,8 @@ func (that *Log) Printf(level zapcore.Level, keywords string, message interface{
 	switch message.(type) {
 	case string:
 		msg = message.(string)
+	case error:
+		msg = message.(error).Error()
 	default:
 		var json = jsoniter.ConfigCompatibleWithStandardLibrary
 		s, err := json.Marshal(message)
