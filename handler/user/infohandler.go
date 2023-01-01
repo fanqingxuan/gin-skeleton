@@ -12,21 +12,20 @@ import (
 
 func InfoHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		svc := svcCtx.WithContext(ctx)
 		var req types.UserInfoReq
 		if err := ctx.ShouldBind(&req); err != nil {
-			svc.Log.Error("Parse Error", fmt.Sprintf("%+v", err))
-			ctx.JSON(http.StatusOK, svc.Response.Error(err.Error()))
+			svcCtx.Log.WithContext(ctx).Error("Parse Error", fmt.Sprintf("%+v", err))
+			ctx.JSON(http.StatusOK, svcCtx.Response.WithContext(ctx).Error(err.Error()))
 			return
 		}
 
-		userLogic := user.NewInfoLogic(svc)
+		userLogic := user.NewInfoLogic(svcCtx)
 		resp, err := userLogic.GetUserInfo(&req)
 		if err != nil {
-			svc.Log.Error("err", fmt.Sprintf("%+v", err))
-			ctx.JSON(http.StatusOK, svc.Response.Error(err.Error()))
+			svcCtx.Log.WithContext(ctx).Error("err", fmt.Sprintf("%+v", err))
+			ctx.JSON(http.StatusOK, svcCtx.Response.WithContext(ctx).Error(err.Error()))
 		} else {
-			ctx.JSON(http.StatusOK, svc.Response.Success(resp))
+			ctx.JSON(http.StatusOK, svcCtx.Response.WithContext(ctx).Success(resp))
 		}
 	}
 }

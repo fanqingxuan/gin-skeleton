@@ -17,17 +17,6 @@ type ServiceContext struct {
 	XCache   *XCache
 }
 
-func (that *ServiceContext) WithContext(ctx context.Context) *ServiceContext {
-	return &ServiceContext{
-		Config:   that.Config,
-		Response: that.Response.WithContext(ctx),
-		Redis:    NewRedis(ctx, that.Redis.client),
-		DB:       that.DB.WithContext(ctx),
-		Log:      that.Log.WithContext(ctx),
-		XCache:   that.XCache,
-	}
-}
-
 func (that *ServiceContext) WithLog(log *Log) *ServiceContext {
 	return &ServiceContext{
 		Config:   that.Config,

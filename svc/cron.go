@@ -16,12 +16,12 @@ type Cron struct {
 	svcCtx *ServiceContext
 }
 
-type JobFunc func(*ServiceContext)
+type JobFunc func(context.Context, *ServiceContext)
 
-func (f JobFunc) Run(svcCtx *ServiceContext) { f(svcCtx) }
+func (f JobFunc) Run(ctx context.Context, svcCtx *ServiceContext) { f(ctx, svcCtx) }
 
 type Job interface {
-	Run(*ServiceContext)
+	Run(context.Context, *ServiceContext)
 }
 
 func NewCron(svcCtx *ServiceContext) *Cron {
@@ -45,15 +45,14 @@ func (that *Cron) AddFunc(spec string, cmd JobFunc) (cron.EntryID, error) {
 
 func (that *Cron) AddJob(spec string, cmd Job) (cron.EntryID, error) {
 	return that.cron.AddFunc(spec, func() {
-		c := context.WithValue(context.Background(), "traceId", uuid.NewV4())
+		ctx := context.WithValue(context.Background(), "traceId", uuid.NewV4())
 
-		ctx := that.svcCtx.WithContext(c)
 		jobName := reflect.TypeOf(cmd).String()
 		start := time.Now()
-		ctx.Log.Info("before", fmt.Sprintf("spec:%s, jobName:%s, start...", spec, jobName))
-		cmd.Run(ctx)
+		that.svcCtx.Log.WithContext(ctx).Info("before", fmt.Sprintf("spec:%s, jobName:%s, start...", spec, jobName))
+		cmd.Run(ctx, that.svcCtx)
 		elapsed := time.Now().Sub(start).Seconds()
-		ctx.Log.Info("after", fmt.Sprintf("spec:%s, jobName:%s, finish,cost:%fs", spec, jobName, elapsed))
+		that.svcCtx.Log.WithContext(ctx).Info("after", fmt.Sprintf("spec:%s, jobName:%s, finish,cost:%fs", spec, jobName, elapsed))
 	})
 }
 
