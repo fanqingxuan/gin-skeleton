@@ -16,6 +16,6 @@ func RegisterHandlers(r *gin.Engine, svcCtx *svc.ServiceContext) {
 	})
 	r.GET("/user", user.IndexHandler(svcCtx))
 
-	r.GET("/userinfo", user.InfoHandler(svcCtx))
+	r.GET("/:id", user.InfoHandler(svcCtx))
 
 }

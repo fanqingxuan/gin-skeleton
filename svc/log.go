@@ -34,11 +34,11 @@ func NewLog(logpath string, loglevel string, logtype LogType) *Log {
 		log:         initLogger("./logs/"+logpath, loglevel, logtype),
 		logtype:     logtype,
 		caller_skip: 2,
+		ctx:         context.Background(),
 	}
 }
 
 func (that *Log) WithContext(ctx context.Context) *Log {
-	that.ctx = ctx
 	return &Log{
 		ctx:         ctx,
 		log:         that.log,

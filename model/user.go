@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	ID       uint `gorm:"primaryKey;column:uuid"`
+	ID       uint `gorm:"primaryKey;column:uid"`
 	Username string
 	Age      int
 	// CreatedAt time.Time

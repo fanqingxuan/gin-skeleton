@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"gin-skeleton/logic"
 	"gin-skeleton/model"
 	"gin-skeleton/svc"
@@ -10,13 +11,15 @@ import (
 
 type InfoLogic struct {
 	*logic.Logic
+	Log       *svc.Log
 	UserModel *model.UserModel
 }
 
-func NewInfoLogic(svcCtx *svc.ServiceContext) *InfoLogic {
+func NewInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *InfoLogic {
 	return &InfoLogic{
 		Logic:     logic.NewLogic(svcCtx),
-		UserModel: model.NewUserModel(svcCtx.DB),
+		Log:       svcCtx.Log.WithContext(ctx),
+		UserModel: model.NewUserModel(svcCtx.DB.WithContext(ctx)),
 	}
 }
 
