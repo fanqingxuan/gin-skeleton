@@ -9,22 +9,20 @@ import (
 )
 
 type ServiceContext struct {
-	Config   config.Config
-	Response *Response
-	Redis    *AWRedis
-	DB       *gorm.DB
-	Log      *Log
-	XCache   *XCache
+	Config config.Config
+	Redis  *AWRedis
+	DB     *gorm.DB
+	Log    *Log
+	XCache *XCache
 }
 
 func (that *ServiceContext) WithLog(log *Log) *ServiceContext {
 	return &ServiceContext{
-		Config:   that.Config,
-		Response: that.Response,
-		Redis:    that.Redis,
-		DB:       NewDB(that.Config, log),
-		Log:      log,
-		XCache:   that.XCache,
+		Config: that.Config,
+		Redis:  that.Redis,
+		DB:     NewDB(that.Config, log),
+		Log:    log,
+		XCache: that.XCache,
 	}
 }
 
@@ -39,11 +37,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		DB:       c.Redis.DB,
 	})
 	return &ServiceContext{
-		Config:   c,
-		Response: NewResponse(),
-		Redis:    NewRedis(context.Background(), Redis),
-		Log:      log,
-		DB:       NewDB(c, log),
-		XCache:   NewXCache(c),
+		Config: c,
+		Redis:  NewRedis(context.Background(), Redis),
+		Log:    log,
+		DB:     NewDB(c, log),
+		XCache: NewXCache(c),
 	}
 }

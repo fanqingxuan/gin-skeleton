@@ -37,7 +37,7 @@ func (that *InfoLogic) GetUserInfo(req *types.UserInfoReq) (resp *types.UserInfo
 
 	if user == nil {
 		resp = &types.UserInfoReply{
-			Message: "no data",
+			Message: "数据不存在",
 		}
 		return
 	}
