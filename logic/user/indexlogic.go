@@ -2,14 +2,10 @@ package user
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"gin-skeleton/common/errorx"
 	"gin-skeleton/logic"
 	"gin-skeleton/svc"
 	"gin-skeleton/types"
-
-	"github.com/go-redis/redis/v8"
 )
 
 type IndexLogic struct {
@@ -24,7 +20,7 @@ func NewIndexLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IndexLogic 
 	}
 }
 
-func (that *IndexLogic) Say(req *types.UserIndexReq) (resp *types.UserIndexReply, err error) {
+func (that *IndexLogic) Handle(req *types.UserIndexReq) (resp *types.UserIndexReply, err error) {
 	val, found := that.XCache.Get(req.Name)
 	var message string
 	found = false
@@ -34,14 +30,7 @@ func (that *IndexLogic) Say(req *types.UserIndexReq) (resp *types.UserIndexReply
 		if req.Message == "" {
 			return nil, errorx.New("消息不能为空")
 		}
-		result := that.Redis.Get(req.Name)
-		if err = result.Err(); err != nil && !errors.Is(err, redis.Nil) {
-			that.Log.Error("获取cache错误key:"+req.Name, err)
-			return
-		}
-		fmt.Println(errors.Is(err, redis.Nil))
-
-		message = result.Val()
+		that.Redis.Get(req.Name).Val()
 		that.XCache.Set(req.Name, req.Message)
 	}
 

@@ -22,7 +22,7 @@ func IndexHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 		}
 
 		logic := user.NewIndexLogic(ctx, svcCtx)
-		resp, err := logic.Say(&req)
+		resp, err := logic.Handle(&req)
 		if err != nil {
 			ctx.JSON(http.StatusOK, response.NewDefaultError(ctx, err))
 		} else {

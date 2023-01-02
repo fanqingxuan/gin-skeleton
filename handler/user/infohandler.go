@@ -22,7 +22,7 @@ func InfoHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 		}
 
 		logic := user.NewInfoLogic(ctx, svcCtx)
-		resp, err := logic.GetUserInfo(&req)
+		resp, err := logic.Handle(&req)
 		if err != nil {
 			ctx.JSON(http.StatusOK, response.NewDefaultError(ctx, err))
 		} else {

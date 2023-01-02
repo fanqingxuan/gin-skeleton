@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
 	uuid "github.com/satori/go.uuid"
 )
@@ -74,5 +73,5 @@ func (that *CronLogger) Info(msg string, keysAndValues ...interface{}) {
 }
 
 func (that *CronLogger) Error(err error, msg string, keysAndValues ...interface{}) {
-	that.logger.Error(msg, fmt.Sprintf("%+v", errors.WithStack(err)))
+	that.logger.Error(msg, fmt.Sprintf("%+v", err))
 }

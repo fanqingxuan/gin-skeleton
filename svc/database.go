@@ -2,11 +2,11 @@ package svc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"gin-skeleton/config"
 	"time"
 
-	"github.com/pkg/errors"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

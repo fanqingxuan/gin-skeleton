@@ -23,7 +23,7 @@ func NewInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *InfoLogic {
 	}
 }
 
-func (that *InfoLogic) GetUserInfo(req *types.UserInfoReq) (resp *types.UserInfoReply, err error) {
+func (that *InfoLogic) Handle(req *types.UserInfoReq) (resp *types.UserInfoReply, err error) {
 	that.Redis.Expire("test", time.Nanosecond/1000)
 	that.Log.Debug("debug 关键字", "这是debug消息")
 	that.Log.Info("info 关键字", "这是info消息")
