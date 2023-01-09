@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"context"
 	"fmt"
 	"gin-skeleton/svc"
 )
@@ -12,6 +13,6 @@ func NewSampleJob() *SampleJob {
 	return &SampleJob{}
 }
 
-func (that *SampleJob) Run(svcCtx *svc.ServiceContext) {
-	fmt.Println(svcCtx.Ctx.Value("traceId"))
+func (that *SampleJob) Run(ctx context.Context, svcCtx *svc.ServiceContext) {
+	fmt.Println(ctx.Value("traceId"))
 }

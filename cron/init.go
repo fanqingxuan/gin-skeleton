@@ -1,7 +1,7 @@
 package cron
 
 import (
-	"gin-skeleton/dao"
+	"context"
 	"gin-skeleton/svc"
 )
 
@@ -11,9 +11,8 @@ func RegisterCronJobs(svcCtx *svc.ServiceContext) {
 
 	c.AddJob("@every 10s", NewRemoveExpiredCacheKey())
 
-	c.AddFunc("@every 1s", func(svcCtx *svc.ServiceContext) {
-		userDao := dao.NewUserDao(svcCtx.DB)
-		userDao.GetUserInfo(2)
+	c.AddFunc("@every 1s", func(ctx context.Context, svcCtx *svc.ServiceContext) {
+
 	})
 
 	c.AddFunc("@every 1s", SampleFunc)

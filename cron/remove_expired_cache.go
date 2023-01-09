@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"context"
 	"gin-skeleton/svc"
 )
 
@@ -11,6 +12,6 @@ func NewRemoveExpiredCacheKey() *RemoveExpiredCacheKey {
 	return &RemoveExpiredCacheKey{}
 }
 
-func (that *RemoveExpiredCacheKey) Run(svcCtx *svc.ServiceContext) {
-	svcCtx.LocalStorage.DeleteExpired()
+func (that *RemoveExpiredCacheKey) Run(ctx context.Context, svcCtx *svc.ServiceContext) {
+	svcCtx.CacheX.DeleteExpired()
 }

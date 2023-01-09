@@ -5,5 +5,5 @@ type Config struct {
 	Redis  `yaml:"Redis"`
 	DB     `yaml:"DB"`
 	Log    `yaml:"Log"`
-	XCache `yaml:"XCache"`
+	CacheX `yaml:"CacheX"`
 }

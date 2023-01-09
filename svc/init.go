@@ -13,7 +13,7 @@ type ServiceContext struct {
 	Redis  *AWRedis
 	DB     *gorm.DB
 	Log    *Log
-	XCache *XCache
+	CacheX *CacheX
 }
 
 func (that *ServiceContext) WithLog(log *Log) *ServiceContext {
@@ -22,7 +22,7 @@ func (that *ServiceContext) WithLog(log *Log) *ServiceContext {
 		Redis:  that.Redis,
 		DB:     NewDB(that.Config, log),
 		Log:    log,
-		XCache: that.XCache,
+		CacheX: that.CacheX,
 	}
 }
 
@@ -41,6 +41,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Redis:  NewRedis(context.Background(), Redis),
 		Log:    log,
 		DB:     NewDB(c, log),
-		XCache: NewXCache(c),
+		CacheX: NewCacheX(c),
 	}
 }

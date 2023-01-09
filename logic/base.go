@@ -7,13 +7,13 @@ import (
 type Logic struct {
 	Redis  *svc.AWRedis
 	Log    *svc.Log
-	XCache *svc.XCache
+	CacheX *svc.CacheX
 }
 
 func NewLogic(svcCtx *svc.ServiceContext) *Logic {
 	return &Logic{
 		Redis:  svcCtx.Redis,
 		Log:    svcCtx.Log,
-		XCache: svcCtx.XCache,
+		CacheX: svcCtx.CacheX,
 	}
 }

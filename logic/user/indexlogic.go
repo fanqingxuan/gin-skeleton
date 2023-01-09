@@ -21,7 +21,7 @@ func NewIndexLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IndexLogic 
 }
 
 func (that *IndexLogic) Handle(req *types.UserIndexReq) (resp *types.UserIndexReply, err error) {
-	val, found := that.XCache.Get(req.Name)
+	val, found := that.CacheX.Get(req.Name)
 	var message string
 	found = false
 	if found {
@@ -31,7 +31,7 @@ func (that *IndexLogic) Handle(req *types.UserIndexReq) (resp *types.UserIndexRe
 			return nil, errorx.New("消息不能为空")
 		}
 		that.Redis.Get(req.Name).Val()
-		that.XCache.Set(req.Name, req.Message)
+		that.CacheX.Set(req.Name, req.Message)
 	}
 
 	return &types.UserIndexReply{
