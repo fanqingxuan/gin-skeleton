@@ -3,13 +3,13 @@ package svc
 import (
 	"context"
 	"fmt"
-	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
+	rotatelogs "github.com/lestrrat/go-file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -110,11 +110,15 @@ func (that *Log) Printf(level zapcore.Level, keywords string, message interface{
 // logpath 日志文件路径
 // loglevel 日志级别
 func initLogger(logpath string, loglevel string, logtype LogType) *zap.Logger {
-
-	filename := fmt.Sprintf("%s.log", strings.Trim(logpath, "/"))
-	file, _ := os.Create(filename)
-
-	write := zapcore.AddSync(file)
+	// 日志分割
+	hook, err := rotatelogs.New(
+		strings.Trim(logpath, "/")+"/%F.log",
+		rotatelogs.WithMaxAge(30*24*time.Hour),
+	)
+	if err != nil {
+		panic(err)
+	}
+	write := zapcore.AddSync(hook)
 	// 设置日志级别
 	// debug 可以打印出 info debug warn
 	// info  级别可以打印 warn info
