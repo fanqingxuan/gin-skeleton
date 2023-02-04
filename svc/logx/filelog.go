@@ -56,6 +56,7 @@ func (fl *fileLogger) Warnf(format string, message ...interface{}) {
 }
 
 func (fl *fileLogger) Errorf(format string, message ...interface{}) {
+
 	fl.printf(zap.ErrorLevel, format, message...)
 }
 
@@ -78,11 +79,14 @@ func (fl *fileLogger) print(level zapcore.Level, message interface{}) {
 		}
 		msg = string(s)
 	}
+
 	zapLogger := fl.zapLogger
-	switch traceId := fl.ctx.Value("traceId"); traceId.(type) {
-	case string:
-		s, _ := traceId.(string)
-		zapLogger = fl.zapLogger.With(zap.String("traceId", s))
+	if fl.ctx != nil {
+		switch traceId := fl.ctx.Value("traceId"); traceId.(type) {
+		case string:
+			s, _ := traceId.(string)
+			zapLogger = fl.zapLogger.With(zap.String("traceId", s))
+		}
 	}
 
 	_, file, line, ok := runtime.Caller(2)
@@ -97,8 +101,9 @@ func (fl *fileLogger) print(level zapcore.Level, message interface{}) {
 func initLogger(loglevel string) *zap.Logger {
 	// 日志分割
 	hook, err := rotatelogs.New(
-		"./logs/%F.log",
+		"./logs/%Y%m%d.log",
 		rotatelogs.WithMaxAge(30*24*time.Hour),
+		rotatelogs.WithRotationTime(time.Duration(10)*time.Second),
 	)
 	if err != nil {
 		panic(err)
