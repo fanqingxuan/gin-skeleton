@@ -20,4 +20,6 @@ func RegisterHandlers(r *gin.Engine, svcCtx *svc.ServiceContext) {
 
 	r.GET("/userinfo", user.InfoHandler(svcCtx))
 
+	r.GET("/adduser", user.AddHandler(svcCtx))
+
 }

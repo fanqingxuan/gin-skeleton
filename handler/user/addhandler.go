@@ -12,17 +12,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InfoHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
+func AddHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		var req types.UserInfoReq
+		var req types.UserAddReq
 		if err := ctx.ShouldBind(&req); err != nil {
 			logx.WithContext(ctx).Error("Handler ShouldBind Parse")
 			ctx.JSON(http.StatusOK, response.NewDefaultError(ctx, errorx.New(err.Error())))
 			return
 		}
 
-		logic := user.NewInfoLogic(ctx, svcCtx)
+		logic := user.NewAddLogic(ctx, svcCtx)
 		resp, err := logic.Handle(&req)
 		if err != nil {
 			ctx.JSON(http.StatusOK, response.NewDefaultError(ctx, err))

@@ -3,25 +3,27 @@ package user
 import (
 	"context"
 	"gin-skeleton/common/errorx"
-	"gin-skeleton/logic"
 	"gin-skeleton/svc"
+	"gin-skeleton/svc/logx"
 	"gin-skeleton/types"
 )
 
 type IndexLogic struct {
-	logic.Logic
-	Log *svc.Log
+	logx.Logger
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
 }
 
 func NewIndexLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IndexLogic {
 	return &IndexLogic{
-		Log:   svcCtx.Log.WithContext(ctx),
-		Logic: *logic.NewLogic(svcCtx),
+		svcCtx: svcCtx,
+		ctx:    ctx,
+		Logger: logx.WithContext(ctx),
 	}
 }
 
 func (that *IndexLogic) Handle(req *types.UserIndexReq) (resp *types.UserIndexReply, err error) {
-	val, found := that.CacheX.Get(req.Name)
+	val, found := that.svcCtx.CacheX.Get(req.Name)
 	var message string
 	found = false
 	if found {
@@ -30,8 +32,8 @@ func (that *IndexLogic) Handle(req *types.UserIndexReq) (resp *types.UserIndexRe
 		if req.Message == "" {
 			return nil, errorx.New("消息不能为空")
 		}
-		that.Redis.Get(req.Name).Val()
-		that.CacheX.Set(req.Name, req.Message)
+		that.svcCtx.Redis.Get(req.Name).Val()
+		that.svcCtx.CacheX.Set(req.Name, req.Message)
 	}
 
 	return &types.UserIndexReply{

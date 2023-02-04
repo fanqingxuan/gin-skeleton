@@ -3,7 +3,7 @@ package config
 type Config struct {
 	App    `yaml:"App"`
 	Redis  `yaml:"Redis"`
-	DB     `yaml:"DB"`
+	Mysql  `yaml:"Mysql"`
 	Log    `yaml:"Log"`
 	CacheX `yaml:"CacheX"`
 }

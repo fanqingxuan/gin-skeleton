@@ -3,31 +3,20 @@ package svc
 import (
 	"context"
 	"gin-skeleton/config"
+	"gin-skeleton/svc/logx"
+	"gin-skeleton/svc/sqlx"
 
 	"github.com/go-redis/redis/v8"
-	"gorm.io/gorm"
 )
 
 type ServiceContext struct {
 	Config config.Config
 	Redis  *AWRedis
-	DB     *gorm.DB
-	Log    *Log
+	Mysql  sqlx.SqlConn
 	CacheX *CacheX
 }
 
-func (that *ServiceContext) WithLog(log *Log) *ServiceContext {
-	return &ServiceContext{
-		Config: that.Config,
-		Redis:  that.Redis,
-		DB:     NewDB(that.Config, log),
-		Log:    log,
-		CacheX: that.CacheX,
-	}
-}
-
 func NewServiceContext(c config.Config) *ServiceContext {
-	log := NewLog("app/", c.Log.Level, BusinessLogType)
 
 	var Redis = redis.NewClient(&redis.Options{
 		Network:  c.Redis.Network,
@@ -36,11 +25,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Password: c.Redis.Password,
 		DB:       c.Redis.DB,
 	})
+	logx.NewLog(c.Log.Level)
 	return &ServiceContext{
 		Config: c,
 		Redis:  NewRedis(context.Background(), Redis),
-		Log:    log,
-		DB:     NewDB(c, log),
+		Mysql:  sqlx.NewMysql(c.Mysql.DataSource),
 		CacheX: NewCacheX(c),
 	}
 }

@@ -7,7 +7,7 @@ import (
 
 func traceId() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		traceId := uuid.NewV4()
+		traceId := uuid.NewV4().String()
 		ctx.Set("traceId", traceId)
 		ctx.Next()
 	}

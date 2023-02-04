@@ -4,18 +4,18 @@ import (
 	"errors"
 	"fmt"
 	"gin-skeleton/common/response"
-	"gin-skeleton/svc"
+	"gin-skeleton/svc/logx"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func recoverLog(logger *svc.Log) gin.HandlerFunc {
+func recoverLog() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				tx_logger := logger.WithContext(ctx)
-				tx_logger.Error("", fmt.Sprintf("%+v", err))
+				fmt.Println(err)
+				logx.WithContext(ctx).Error(fmt.Sprintf("%+v", err))
 				ctx.JSON(http.StatusInternalServerError,
 					response.NewCodeError(ctx, http.StatusInternalServerError, errors.New("服务器内部错误")))
 				ctx.Abort()

@@ -16,3 +16,12 @@ type UserInfoReq struct {
 type UserInfoReply struct {
 	Message string `json:"message"`
 }
+
+type UserAddReq struct {
+	Username string `json:"username" form:"username" binding:"required"`
+	Age      int64  `json:"age" form:"age"`
+}
+
+type UserAddReply struct {
+	UserId int64 `json:"userid"`
+}

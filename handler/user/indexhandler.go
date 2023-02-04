@@ -5,6 +5,7 @@ import (
 	"gin-skeleton/common/response"
 	"gin-skeleton/logic/user"
 	"gin-skeleton/svc"
+	"gin-skeleton/svc/logx"
 	"gin-skeleton/types"
 	"net/http"
 
@@ -16,7 +17,7 @@ func IndexHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 
 		var req types.UserIndexReq
 		if err := ctx.ShouldBind(&req); err != nil {
-			svcCtx.Log.WithContext(ctx).Error("Handler ShouldBind Parse", err)
+			logx.WithContext(ctx).Error("Handler ShouldBind Parse")
 			ctx.JSON(http.StatusOK, response.NewDefaultError(ctx, errorx.New(err.Error())))
 			return
 		}

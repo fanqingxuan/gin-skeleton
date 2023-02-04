@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	"gin-skeleton/svc"
+	"gin-skeleton/svc/logx"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -26,7 +26,7 @@ var defaultLogFormatter = func(param gin.LogFormatterParams) string {
 	)
 }
 
-func requestLog(logger *svc.Log) gin.HandlerFunc {
+func requestLog() gin.HandlerFunc {
 	formatter := defaultLogFormatter
 
 	notlogged := []string{}
@@ -73,7 +73,7 @@ func requestLog(logger *svc.Log) gin.HandlerFunc {
 
 			param.Path = path
 
-			logger.WithContext(c).Info("request", formatter(param))
+			logx.WithContext(c).Info(formatter(param))
 		}
 	}
 }

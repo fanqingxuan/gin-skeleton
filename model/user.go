@@ -1,38 +1,71 @@
 package model
 
 import (
-	"errors"
-
-	"gorm.io/gorm"
+	"context"
+	"gin-skeleton/svc/sqlx"
 )
 
 type User struct {
-	ID       uint `gorm:"primaryKey;column:uid"`
-	Username string
-	Age      int
-	// CreatedAt time.Time
-	// UpdatedAt time.Time
-	// DeletedAt time.Time
+	Uid      int64  `db:"uid"`
+	Username string `db:"username"`
+	Age      int64  `db:"age"`
 }
 
 type UserModel struct {
-	db *gorm.DB
+	db  sqlx.SqlConn
+	ctx context.Context
 }
 
-func NewUserModel(db *gorm.DB) *UserModel {
-	return &UserModel{
-		db: db,
+func NewUserModel(ctx context.Context, db sqlx.SqlConn) UserModel {
+	return UserModel{
+		db:  db,
+		ctx: ctx,
 	}
 }
 
 func (that *UserModel) FindOne(pk uint) (*User, error) {
-	var user *User
-	err := that.db.Limit(1).Find(&user, pk).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
-	if err != nil {
+	var resp User
+	err := that.db.QueryRowCtx(that.ctx, &resp, "select * from users where uid=?", pk)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlx.ErrNotFound:
+		return nil, sqlx.ErrNotFound
+	default:
 		return nil, err
 	}
-	return user, nil
+}
+
+func (that *UserModel) List(age int) ([]User, error) {
+	var resp []User
+	err := that.db.QueryRowsCtx(that.ctx, &resp, "select * from users where age>?", age)
+	switch err {
+	case nil:
+		return resp, nil
+	case sqlx.ErrNotFound:
+		return nil, sqlx.ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
+func (that *UserModel) Insert(user *User) (int64, error) {
+	const insertsql = `insert into users (username,age) values(?, ?)`
+	// insert op
+	res, err := that.db.Exec(insertsql, user.Username, user.Age)
+	if err != nil {
+		return -1, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return -1, err
+	}
+	return id, nil
+}
+
+func (that *UserModel) Delete(pk uint64) error {
+	const deletesql = `delete from users where uid=?`
+	// insert op
+	_, err := that.db.Exec(deletesql, pk)
+	return err
 }

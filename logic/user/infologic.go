@@ -2,38 +2,42 @@ package user
 
 import (
 	"context"
-	"gin-skeleton/logic"
+	"fmt"
 	"gin-skeleton/model"
 	"gin-skeleton/svc"
+	"gin-skeleton/svc/logx"
 	"gin-skeleton/types"
 	"time"
 )
 
 type InfoLogic struct {
-	*logic.Logic
-	Log       *svc.Log
-	UserModel *model.UserModel
+	logx.Logger
+	ctx       context.Context
+	svcCtx    *svc.ServiceContext
+	UserModel model.UserModel
 }
 
 func NewInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *InfoLogic {
 	return &InfoLogic{
-		Logic:     logic.NewLogic(svcCtx),
-		Log:       svcCtx.Log.WithContext(ctx),
-		UserModel: model.NewUserModel(svcCtx.DB.WithContext(ctx)),
+		svcCtx:    svcCtx,
+		ctx:       ctx,
+		Logger:    logx.WithContext(ctx),
+		UserModel: model.NewUserModel(ctx, svcCtx.Mysql),
 	}
 }
 
 func (that *InfoLogic) Handle(req *types.UserInfoReq) (resp *types.UserInfoReply, err error) {
-	that.Redis.Expire("test", time.Nanosecond/1000)
-	that.Log.Debug("debug 关键字", "这是debug消息")
-	that.Log.Info("info 关键字", "这是info消息")
-	that.Log.Warn("warn 关键字", "这是warn消息")
-	that.Log.Error("error 关键字", req)
+	that.svcCtx.Redis.Expire("test", time.Nanosecond/1000)
+	that.Logger.Debug("这是debug消息")
+	that.Logger.Info("这是info消息")
+	that.Logger.Warn("这是warn消息")
+	that.Logger.Error(req)
 
-	user, err := that.UserModel.FindOne(req.UserId)
+	user, err := that.UserModel.List(100)
 	if err != nil {
 		return
 	}
+	fmt.Println(user)
 
 	if user == nil {
 		resp = &types.UserInfoReply{
@@ -42,7 +46,7 @@ func (that *InfoLogic) Handle(req *types.UserInfoReq) (resp *types.UserInfoReply
 		return
 	}
 	resp = &types.UserInfoReply{
-		Message: user.Username,
+		Message: "hello",
 	}
 	return
 

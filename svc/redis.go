@@ -2,8 +2,6 @@ package svc
 
 import (
 	"context"
-	"runtime"
-	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -244,36 +242,7 @@ func NewRedis(ctx context.Context, client *redis.Client) *AWRedis {
 		ctx:    ctx,
 		client: client,
 	}
-	client.AddHook(&WriteLogHook{})
 	return redis
-}
-
-type WriteLogHook struct {
-	redis.Hook
-}
-
-func (h *WriteLogHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
-	return ctx, nil
-}
-func (h *WriteLogHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
-	err := cmd.Err()
-	if err != nil && err != redis.Nil {
-		_, file, line, ok := runtime.Caller(5)
-		if ok {
-			linenum := trimmedPath(file + ":" + strconv.FormatInt(int64(line), 10))
-			panic("REDIS ERROR\t" + cmd.String() + " in file " + linenum)
-		} else {
-			panic(cmd.String())
-		}
-	}
-	return err
-}
-
-func (h *WriteLogHook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
-	return ctx, nil
-}
-func (h *WriteLogHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) error {
-	return nil
 }
 
 func (that *AWRedis) Command() *redis.CommandsInfoCmd {
