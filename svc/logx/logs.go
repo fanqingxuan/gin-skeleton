@@ -48,5 +48,6 @@ func Warnf(format string, message ...interface{}) {
 }
 
 func Errorf(format string, message ...interface{}) {
+
 	l.Errorf(format, message...)
 }
