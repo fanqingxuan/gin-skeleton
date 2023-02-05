@@ -16,6 +16,18 @@ type response struct {
 	TraceId string      `json:"traceid"`
 }
 
+func NoMethod(ctx *gin.Context) {
+	New(ctx, errorx.NewCodeError(http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed)))
+}
+
+func NoRoute(ctx *gin.Context) {
+	New(ctx, errorx.NewCodeError(http.StatusNotFound, http.StatusText(http.StatusNotFound)))
+}
+
+func ServiceUnavailable(ctx *gin.Context) {
+	New(ctx, errorx.NewCodeError(http.StatusServiceUnavailable, http.StatusText(http.StatusServiceUnavailable)))
+}
+
 func New(ctx *gin.Context, data interface{}) {
 	resp := newResponse(ctx, data)
 	resp.TraceId = fmt.Sprintf("%s", ctx.Value("traceId"))

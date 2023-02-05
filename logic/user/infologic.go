@@ -29,11 +29,16 @@ func NewInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *InfoLogic {
 
 func (that *InfoLogic) Handle(req *types.UserInfoReq) (resp *types.UserInfoReply, err error) {
 	that.svcCtx.Redis.Expire("test", time.Nanosecond/1000)
+
 	that.Logger.Debug("这是debug消息")
 	that.Logger.Info("这是info消息")
 	that.Logger.Warn("这是warn消息")
 	that.Logger.Error(req)
 
+	that.Logger.Debugf("debg测试 %s %d", "姓名", 43)
+	that.Logger.Infof("info测试 %s %s", "姓名", 43)
+	that.Logger.Warnf("warn测试 %s %s", "姓名", 43)
+	that.Logger.Errorf("error测试 %s %s", "姓名", 43)
 	user, err := that.UserModel.List(100)
 	if err != nil {
 		return
