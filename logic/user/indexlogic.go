@@ -30,7 +30,7 @@ func (that *IndexLogic) Handle(req *types.UserIndexReq) (resp *types.UserIndexRe
 		message = " get value from cache:" + val.(string)
 	} else {
 		if req.Message == "" {
-			return nil, errorx.New("消息不能为空")
+			return nil, errorx.NewDefaultError("消息不能为空")
 		}
 		that.svcCtx.Redis.Get(req.Name).Val()
 		that.svcCtx.CacheX.Set(req.Name, req.Message)

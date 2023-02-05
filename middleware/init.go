@@ -8,5 +8,5 @@ func RegisterGlobalMiddlewares(r *gin.Engine) {
 
 	r.Use(traceId())
 	r.Use(requestLog())
-	// r.Use(recoverLog())
+	r.Use(recoverLog())
 }

@@ -3,7 +3,7 @@
 
 ### 特点
 
-- 集成gorm，用于mysql存储层操作
+- 自研sqlx库，用于mysql存储层操作
 
 - 集成go redis，用于操作缓存
 
@@ -33,7 +33,6 @@
 
 - 集成gopkg.in/yaml.v3，用于解析yaml文件的配置项
 - 集成go-cache,用于本地缓存
-- 集成robfig/cron，用于定时任务
 - 集成pkg/errors,用于更好的error体验
 
 ### 目录结构

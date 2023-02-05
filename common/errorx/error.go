@@ -1,13 +1,20 @@
 package errorx
 
-type MYError struct {
-	s string
+const defaultCode = 1001
+
+type CodeError struct {
+	Code int
+	Msg  string
 }
 
-func New(s string) *MYError {
-	return &MYError{s}
+func NewCodeError(code int, msg string) error {
+	return &CodeError{Code: code, Msg: msg}
 }
 
-func (e *MYError) Error() string {
-	return e.s
+func NewDefaultError(msg string) error {
+	return NewCodeError(defaultCode, msg)
+}
+
+func (e *CodeError) Error() string {
+	return e.Msg
 }

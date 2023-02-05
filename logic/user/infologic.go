@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"gin-skeleton/common/errorx"
 	"gin-skeleton/model"
 	"gin-skeleton/svc"
 	"gin-skeleton/svc/logx"
@@ -40,9 +41,8 @@ func (that *InfoLogic) Handle(req *types.UserInfoReq) (resp *types.UserInfoReply
 	fmt.Println(user)
 
 	if user == nil {
-		resp = &types.UserInfoReply{
-			Message: "数据不存在",
-		}
+
+		err = errorx.NewDefaultError("数据不存在")
 		return
 	}
 	resp = &types.UserInfoReply{

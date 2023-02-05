@@ -2,12 +2,11 @@ package user
 
 import (
 	"gin-skeleton/common/errorx"
-	"gin-skeleton/common/response"
+	"gin-skeleton/common/responsex"
 	"gin-skeleton/logic/user"
 	"gin-skeleton/svc"
 	"gin-skeleton/svc/logx"
 	"gin-skeleton/types"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,16 +17,16 @@ func IndexHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 		var req types.UserIndexReq
 		if err := ctx.ShouldBind(&req); err != nil {
 			logx.WithContext(ctx).Error("Handler ShouldBind Parse")
-			ctx.JSON(http.StatusOK, response.NewDefaultError(ctx, errorx.New(err.Error())))
+			responsex.New(ctx, errorx.NewCodeError(1, err.Error()))
 			return
 		}
 
 		logic := user.NewIndexLogic(ctx, svcCtx)
 		resp, err := logic.Handle(&req)
 		if err != nil {
-			ctx.JSON(http.StatusOK, response.NewDefaultError(ctx, err))
+			responsex.New(ctx, err)
 		} else {
-			ctx.JSON(http.StatusOK, response.NewDefault(ctx, resp))
+			responsex.New(ctx, resp)
 		}
 	}
 }
