@@ -136,7 +136,7 @@ func logInstanceError(datasource string, err error) {
 
 func logSqlError(ctx context.Context, stmt string, err error) {
 	if err != nil && err != ErrNotFound {
-		logx.WithContext(ctx).Errorf("stmt: %s, error: %s", stmt, err.Error())
+		logx.WithContext(ctx).WithCallerSkip(7).Errorf("stmt: %s, error: %s", stmt, err.Error())
 	}
 }
 

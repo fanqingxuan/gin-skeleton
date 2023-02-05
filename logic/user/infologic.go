@@ -31,7 +31,7 @@ func (that *InfoLogic) Handle(req *types.UserInfoReq) (resp *types.UserInfoReply
 	that.svcCtx.Redis.Expire("test", time.Nanosecond/1000)
 
 	that.Logger.Debug("这是debug消息")
-	that.Logger.Info("这是info消息")
+	that.Logger.Info("这是info消息", "这是info日志22")
 	that.Logger.Warn("这是warn消息")
 	that.Logger.Error(req)
 
@@ -40,6 +40,7 @@ func (that *InfoLogic) Handle(req *types.UserInfoReq) (resp *types.UserInfoReply
 	that.Logger.Warnf("warn测试 %s %s", "姓名", 43)
 	that.Logger.Errorf("error测试 %s %s", "姓名", 43)
 	user, err := that.UserModel.List(100)
+	that.Logger.Info(user)
 	if err != nil {
 		return
 	}

@@ -3,7 +3,6 @@ package logx
 import (
 	"context"
 	"fmt"
-	"runtime"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
@@ -15,6 +14,7 @@ import (
 type fileLogger struct {
 	zapLogger *zap.Logger
 	ctx       context.Context
+	skip      int
 }
 
 // 断言fileLogger实现了Logger接口
@@ -23,77 +23,83 @@ var _ Logger = &fileLogger{}
 func (fl *fileLogger) WithContext(ctx context.Context) Logger {
 	return &fileLogger{
 		zapLogger: fl.zapLogger,
+		skip:      fl.skip,
 		ctx:       ctx,
 	}
 }
-
-func (fl *fileLogger) Debug(message interface{}) {
-	fl.print(zap.DebugLevel, message)
+func (fl *fileLogger) WithCallerSkip(skip int) Logger {
+	return &fileLogger{
+		zapLogger: fl.zapLogger,
+		ctx:       fl.ctx,
+		skip:      skip,
+	}
 }
 
-func (fl *fileLogger) Info(message interface{}) {
-	fl.print(zap.InfoLevel, message)
+func (fl *fileLogger) Debug(message ...interface{}) {
+	fl.print(zap.DebugLevel, message...)
 }
 
-func (fl *fileLogger) Warn(message interface{}) {
-	fl.print(zap.WarnLevel, message)
+func (fl *fileLogger) Info(message ...interface{}) {
+	fl.print(zap.InfoLevel, message...)
 }
 
-func (fl *fileLogger) Error(message interface{}) {
-	fl.print(zap.ErrorLevel, message)
+func (fl *fileLogger) Warn(message ...interface{}) {
+	fl.print(zap.WarnLevel, message...)
+}
+
+func (fl *fileLogger) Error(message ...interface{}) {
+	fl.print(zap.ErrorLevel, message...)
 }
 
 func (fl *fileLogger) Debugf(format string, message ...interface{}) {
-	fl.printf(zap.DebugLevel, format, message...)
+	fl.WithCallerSkip(fl.skip + 1).Debug(formatter(format, message...))
 }
 
 func (fl *fileLogger) Infof(format string, message ...interface{}) {
-	fl.printf(zap.InfoLevel, format, message...)
+	fl.WithCallerSkip(fl.skip + 1).Info(formatter(format, message...))
 }
 
 func (fl *fileLogger) Warnf(format string, message ...interface{}) {
-	fl.printf(zap.WarnLevel, format, message...)
+	fl.WithCallerSkip(fl.skip + 1).Warn(formatter(format, message...))
 }
 
 func (fl *fileLogger) Errorf(format string, message ...interface{}) {
 
-	fl.printf(zap.ErrorLevel, format, message...)
+	fl.WithCallerSkip(fl.skip + 1).Error(formatter(format, message...))
 }
 
-func (fl *fileLogger) printf(level zapcore.Level, format string, message ...interface{}) {
-	fl.print(level, fmt.Sprintf(format, message...))
+func formatter(format string, message ...interface{}) string {
+	return fmt.Sprintf(format, message...)
 }
 
-func (fl *fileLogger) print(level zapcore.Level, message interface{}) {
+func (fl *fileLogger) print(level zapcore.Level, messageSlice ...interface{}) {
 	var msg string
-	switch message.(type) {
-	case string:
-		msg = message.(string)
-	case error:
-		msg = message.(error).Error()
-	default:
-		var json = jsoniter.ConfigCompatibleWithStandardLibrary
-		s, err := json.Marshal(message)
-		if err != nil {
-			panic("write log error:" + err.Error())
-		}
-		msg = string(s)
-	}
-
-	zapLogger := fl.zapLogger
-	if fl.ctx != nil {
-		switch traceId := fl.ctx.Value("traceId"); traceId.(type) {
+	for _, message := range messageSlice {
+		switch message.(type) {
 		case string:
-			s, _ := traceId.(string)
-			zapLogger = fl.zapLogger.With(zap.String("traceId", s))
+			msg = message.(string)
+		case error:
+			msg = message.(error).Error()
+		default:
+			var json = jsoniter.ConfigCompatibleWithStandardLibrary
+			s, err := json.Marshal(message)
+			if err != nil {
+				panic("write log error:" + err.Error())
+			}
+			msg = string(s)
 		}
+
+		zapLogger := fl.zapLogger
+		if fl.ctx != nil {
+			switch traceId := fl.ctx.Value("traceId"); traceId.(type) {
+			case string:
+				s, _ := traceId.(string)
+				zapLogger = fl.zapLogger.With(zap.String("traceId", s))
+			}
+		}
+		zapLogger.WithOptions(zap.AddCallerSkip(fl.skip)).Log(level, msg)
 	}
 
-	_, file, line, ok := runtime.Caller(2)
-	if !ok {
-		panic("runtime caller error")
-	}
-	zapLogger.With(zap.Int("line", line)).With(zap.String("file", trimmedPath(file))).Log(level, msg)
 }
 
 // logpath 日志文件路径
@@ -130,7 +136,7 @@ func initLogger(loglevel string) *zap.Logger {
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:       "time",
 		LevelKey:      "level",
-		CallerKey:     "file",
+		CallerKey:     "caller",
 		MessageKey:    "msg",
 		FunctionKey:   zapcore.OmitKey,
 		StacktraceKey: "stacktrace",
@@ -153,9 +159,9 @@ func initLogger(loglevel string) *zap.Logger {
 		write,
 		level,
 	)
-
+	caller := zap.AddCaller()
 	// 构造日志
-	l := zap.New(core)
+	l := zap.New(core, caller)
 	defer l.Sync()
 	return l
 }

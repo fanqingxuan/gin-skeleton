@@ -6,9 +6,10 @@ import (
 
 var l *fileLogger
 
-func NewLog(loglevel string) {
+func New(loglevel string, skip int) {
 	l = &fileLogger{
 		zapLogger: initLogger(loglevel),
+		skip:      skip,
 	}
 }
 
@@ -16,23 +17,32 @@ func WithContext(ctx context.Context) Logger {
 	return &fileLogger{
 		zapLogger: l.zapLogger,
 		ctx:       ctx,
+		skip:      l.skip,
 	}
 }
 
-func Debug(message interface{}) {
-	l.Debug(message)
+func WithCallerSkip(skip int) Logger {
+	return &fileLogger{
+		zapLogger: l.zapLogger,
+		ctx:       l.ctx,
+		skip:      skip,
+	}
 }
 
-func Info(message interface{}) {
-	l.Info(message)
+func Debug(message ...interface{}) {
+	l.Debug(message...)
 }
 
-func Warn(message interface{}) {
-	l.Warn(message)
+func Info(message ...interface{}) {
+	l.Info(message...)
 }
 
-func Error(message interface{}) {
-	l.Error(message)
+func Warn(message ...interface{}) {
+	l.Warn(message...)
+}
+
+func Error(message ...interface{}) {
+	l.Error(message...)
 }
 
 func Debugf(format string, message ...interface{}) {
@@ -48,6 +58,5 @@ func Warnf(format string, message ...interface{}) {
 }
 
 func Errorf(format string, message ...interface{}) {
-
 	l.Errorf(format, message...)
 }
