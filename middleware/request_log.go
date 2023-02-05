@@ -8,26 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// defaultLogFormatter is the default log format function Logger middleware uses.
-var defaultLogFormatter = func(param gin.LogFormatterParams) string {
-
-	if param.Latency > time.Minute {
-		param.Latency = param.Latency.Truncate(time.Second)
-	}
-
-	return fmt.Sprintf("%s\t%s\t%d\t%s\t%s\t%s\t%s",
-		param.Request.Proto,
-		param.Method,
-		param.StatusCode,
-		param.ClientIP,
-		param.Latency,
-		param.Path,
-		param.Request.UserAgent(),
-	)
-}
-
 func requestLog() gin.HandlerFunc {
-	formatter := defaultLogFormatter
 
 	notlogged := []string{}
 
@@ -51,29 +32,28 @@ func requestLog() gin.HandlerFunc {
 
 		// Log only when path is not being skipped
 		if _, ok := skip[path]; !ok {
-			param := gin.LogFormatterParams{
-				Request: c.Request,
-				Keys:    c.Keys,
-			}
-
-			// Stop timer
-			param.TimeStamp = time.Now()
-			param.Latency = param.TimeStamp.Sub(start)
-
-			param.ClientIP = c.ClientIP()
-			param.Method = c.Request.Method
-			param.StatusCode = c.Writer.Status()
-			param.ErrorMessage = c.Errors.ByType(gin.ErrorTypePrivate).String()
-
-			param.BodySize = c.Writer.Size()
 
 			if raw != "" {
 				path = path + "?" + raw
 			}
+			TimeStamp := time.Now()
+			Latency := TimeStamp.Sub(start)
+			if Latency > time.Minute {
+				Latency = Latency.Truncate(time.Second)
+			}
+			requestMap := map[string]interface{}{
+				"Path":      path,
+				"Method":    c.Request.Method,
+				"ClientIP":  c.ClientIP(),
+				"Latency":   fmt.Sprintf("%s", Latency),
+				"Status":    c.Writer.Status(),
+				"Proto":     c.Request.Proto,
+				"UserAgent": c.Request.UserAgent(),
+				"Msg":       c.Errors.ByType(gin.ErrorTypePrivate).String(),
+				"Size":      c.Writer.Size(),
+			}
 
-			param.Path = path
-
-			logx.WithContext(c).Info(formatter(param))
+			logx.WithContext(c).Info(requestMap)
 		}
 	}
 }

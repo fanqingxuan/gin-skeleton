@@ -3,6 +3,7 @@ package logx
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
@@ -74,10 +75,19 @@ func formatter(format string, message ...interface{}) string {
 
 func (fl *fileLogger) print(level zapcore.Level, messageSlice ...interface{}) {
 	var msg string
+	zapLogger := fl.zapLogger
+	if fl.ctx != nil {
+		switch traceId := fl.ctx.Value("traceId"); traceId.(type) {
+		case string:
+			s, _ := traceId.(string)
+			zapLogger = fl.zapLogger.With(zap.String("traceId", s))
+		}
+	}
 	for _, message := range messageSlice {
 		switch message.(type) {
 		case string:
 			msg = message.(string)
+
 		case error:
 			msg = message.(error).Error()
 		default:
@@ -89,32 +99,27 @@ func (fl *fileLogger) print(level zapcore.Level, messageSlice ...interface{}) {
 			msg = string(s)
 		}
 
-		zapLogger := fl.zapLogger
-		if fl.ctx != nil {
-			switch traceId := fl.ctx.Value("traceId"); traceId.(type) {
-			case string:
-				s, _ := traceId.(string)
-				zapLogger = fl.zapLogger.With(zap.String("traceId", s))
-			}
-		}
 		zapLogger.WithOptions(zap.AddCallerSkip(fl.skip)).Log(level, msg)
 	}
 
 }
 
-// logpath 日志文件路径
-// loglevel 日志级别
-func initLogger(loglevel string) *zap.Logger {
-	// 日志分割
+func getWriter(filename string) io.Writer {
 	hook, err := rotatelogs.New(
-		"./logs/%Y%m%d.log",
+		fmt.Sprintf("%s/%s-%s.log", "./logs", "%Y%m%d", filename),
 		rotatelogs.WithMaxAge(30*24*time.Hour),
 		rotatelogs.WithRotationTime(time.Duration(10)*time.Second),
 	)
 	if err != nil {
 		panic(err)
 	}
-	write := zapcore.AddSync(hook)
+	return hook
+}
+
+// logpath 日志文件路径
+// loglevel 日志级别
+func initLogger(loglevel string) *zap.Logger {
+
 	// 设置日志级别
 	// debug 可以打印出 info debug warn
 	// info  级别可以打印 warn info
@@ -154,10 +159,24 @@ func initLogger(loglevel string) *zap.Logger {
 	// 设置日志级别
 	atomicLevel := zap.NewAtomicLevel()
 	atomicLevel.SetLevel(level)
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
-		write,
-		level,
+
+	// 根据日志级别拆分日期
+	infoWriter := getWriter("info")
+	warnWriter := getWriter("error")
+
+	eableInfoLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool {
+		return l < zap.WarnLevel
+	})
+	enableWarnLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool {
+		return l >= zap.WarnLevel
+	})
+	cores := []zapcore.Core{
+		zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), zapcore.AddSync(infoWriter), eableInfoLevel),
+		zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), zapcore.AddSync(warnWriter), enableWarnLevel),
+	}
+
+	core := zapcore.NewTee(
+		cores...,
 	)
 	caller := zap.AddCaller()
 	// 构造日志
