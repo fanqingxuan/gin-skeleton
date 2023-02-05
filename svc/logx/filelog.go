@@ -2,12 +2,11 @@ package logx
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-	rotatelogs "github.com/lestrrat/go-file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -91,7 +90,6 @@ func (fl *fileLogger) print(level zapcore.Level, messageSlice ...interface{}) {
 		case error:
 			msg = message.(error).Error()
 		default:
-			var json = jsoniter.ConfigCompatibleWithStandardLibrary
 			s, err := json.Marshal(message)
 			if err != nil {
 				panic("write log error:" + err.Error())
@@ -105,14 +103,12 @@ func (fl *fileLogger) print(level zapcore.Level, messageSlice ...interface{}) {
 }
 
 func getWriter(filename string) io.Writer {
-	hook, err := rotatelogs.New(
-		fmt.Sprintf("%s/%s-%s.log", "./logs", "%Y%m%d", filename),
-		rotatelogs.WithMaxAge(30*24*time.Hour),
-		rotatelogs.WithRotationTime(time.Duration(10)*time.Second),
+	hook := NewFileWriter(
+		fmt.Sprintf("%s/%s.log", "./logs", filename),
+		//"2006-01-02T15-04-05.000"
+		"20060102",
 	)
-	if err != nil {
-		panic(err)
-	}
+
 	return hook
 }
 
