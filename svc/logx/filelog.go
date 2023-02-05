@@ -156,19 +156,15 @@ func initLogger(loglevel string) *zap.Logger {
 		EncodeLevel:    zapcore.CapitalLevelEncoder,
 	}
 
-	// 设置日志级别
-	atomicLevel := zap.NewAtomicLevel()
-	atomicLevel.SetLevel(level)
-
 	// 根据日志级别拆分日期
 	infoWriter := getWriter("info")
 	warnWriter := getWriter("error")
 
 	eableInfoLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool {
-		return l < zap.WarnLevel
+		return l >= level && l < zap.WarnLevel
 	})
 	enableWarnLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool {
-		return l >= zap.WarnLevel
+		return l >= level && l >= zap.WarnLevel
 	})
 	cores := []zapcore.Core{
 		zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), zapcore.AddSync(infoWriter), eableInfoLevel),
