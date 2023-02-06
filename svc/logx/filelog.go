@@ -122,18 +122,11 @@ func initLogger(loglevel string) *zap.Logger {
 	// warn  只能打印 warn
 	// debug->info->warn->error
 	var level zapcore.Level
-	switch loglevel {
-	case "debug":
-		level = zap.DebugLevel
-	case "info":
-		level = zap.InfoLevel
-	case "warn":
-		level = zap.WarnLevel
-	case "error":
-		level = zap.ErrorLevel
-	default:
+	level, err := zapcore.ParseLevel(loglevel)
+	if err != nil {
 		level = zap.InfoLevel
 	}
+
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:       "time",
 		LevelKey:      "level",
