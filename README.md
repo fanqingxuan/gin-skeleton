@@ -1,13 +1,13 @@
 # gin-demo
-用gin框架搭建的一个项目结构，方便快速开发项目。
-
+用gin框架配合golang方面比较优秀的库，搭建的一个项目结构，方便快速开发项目。
+用最少的依赖实现80%项目可以完成的需求
 ### 特点
 
 - 自研sqlx库，用于mysql存储层操作
 
 - 集成go redis，用于操作缓存
 
-- 集成uber/zapgo-file-rotatelogs, 记录日志
+- 集成uber用于记录日志
 
   项目中日志进行了分解:
 
@@ -15,25 +15,23 @@
 
     记录http请求的request和response结果
 
-  - panic日志
+  - error日志
 
-    记录http请求产生的panic错误日志，方便快速定位错误问题
+    记录http请求产生的panic、warn和error等级的日志，方便快速定位错误问题
 
-  - app日志
+  - info日志
 
-    记录开发过程中，我们记录的业务日志，这是我们最常用的日志，日志当中记录了traceId，方便快速根据请求查看当前请求的日志流，
-    日志格式如下,包括了traceId、file、keywords，以及我们记录的重要信息:
+    记录开发过程中的debug、info级别的日志
+
+    日志格式如下,包括了traceId、file、line，以及我们记录的重要信息:
     
   ```shell
-      2022-11-05 00:40:23.576	DEBUG	dao/user.go:24	83e51872-35a3-455d-9c5f-bd64ee140d4c	sql	[0.527ms] [rows:0] SELECT * FROM `users` WHERE `users`.`uid` = 7777 ORDER BY `users`.`uid` LIMIT 1
+      {"level":"INFO","time":"2023-02-06 13:05:27.670","caller":"user/infologic.go:39","msg":"info测试 姓名 %!s(int=43)","traceId":"3137fb9e-ac8b-41ba-88a0-28e0ae0bd7cc"}
 
   ```
-  - cron 定时任务业务日志
-  - cron_panic 定时任务产生的panic日志
 
 - 集成gopkg.in/yaml.v3，用于解析yaml文件的配置项
 - 集成go-cache,用于本地缓存
-- 集成pkg/errors,用于更好的error体验
 
 ### 目录结构
 
@@ -41,16 +39,24 @@
 - handler -业务控制器&路由配置,可以根据不同的子目录拆分模块handler
 - logs -日志目录
 - middleware -中间件目录
-- entity -表模型目录
+- model -数据模型，数据库查询操作通常在这里完成
 - logic -业务逻辑目录,可以根据不同的子目录拆分模块
-- dao -数据库操作
 - svc -定义了log、db、redis等基础服务组件的封装
-- types 定义了请求参数的数据结构
-- cron 定时任务
-- server.go -程序入库文件
+- types 定义了请求参数、相应格式的数据结构
+- main.go -程序入口文件
 
 ### 其它
 
 - 日志按天进行分割
 - 业务日志可以根据traceId查看当次请求的所有日志
 - 响应，返回固定的字段，包括code、message、data、traceid
+- 本项目倡导简单精良，go.mod文件依赖如下
+```shell
+	github.com/gin-gonic/gin v1.8.1
+	github.com/go-redis/redis/v8 v8.11.5
+	github.com/go-sql-driver/mysql v1.6.0
+	github.com/google/uuid v1.3.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
+	go.uber.org/zap v1.23.0
+	gopkg.in/yaml.v3 v3.0.1
+```
