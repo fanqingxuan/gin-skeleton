@@ -10,11 +10,6 @@
 - 集成uber用于记录日志
 
   项目中日志进行了分解:
-
-  - request日志  
-
-    记录http请求的request和response结果
-
   - error日志
 
     记录http请求产生的panic、warn和error等级的日志，方便快速定位错误问题
@@ -60,3 +55,8 @@
 	go.uber.org/zap v1.23.0
 	gopkg.in/yaml.v3 v3.0.1
 ```
+
+### 代办
+- Redis库整理
+- 自动生成model、logic文件、handler工具
+- access日志拆分
