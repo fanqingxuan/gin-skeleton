@@ -17,16 +17,16 @@ func IndexHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 		var req types.UserIndexReq
 		if err := ctx.ShouldBind(&req); err != nil {
 			logx.WithContext(ctx).Error("Handler ShouldBind Parse")
-			responsex.New(ctx, errorx.NewCodeError(1, err.Error()))
+			responsex.Result(ctx, errorx.NewCodeError(1, err.Error()))
 			return
 		}
 
 		logic := user.NewIndexLogic(ctx, svcCtx)
 		resp, err := logic.Handle(&req)
 		if err != nil {
-			responsex.New(ctx, err)
+			responsex.Result(ctx, err)
 		} else {
-			responsex.New(ctx, resp)
+			responsex.Result(ctx, resp)
 		}
 	}
 }

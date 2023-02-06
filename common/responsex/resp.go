@@ -17,35 +17,25 @@ type response struct {
 }
 
 func NoMethod(ctx *gin.Context) {
-	New(ctx, errorx.NewCodeError(http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed)))
+	Result(ctx, errorx.NewCodeError(http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed)))
 }
 
 func NoRoute(ctx *gin.Context) {
-	New(ctx, errorx.NewCodeError(http.StatusNotFound, http.StatusText(http.StatusNotFound)))
+	Result(ctx, errorx.NewCodeError(http.StatusNotFound, http.StatusText(http.StatusNotFound)))
 }
 
 func ServiceUnavailable(ctx *gin.Context) {
-	New(ctx, errorx.NewCodeError(http.StatusServiceUnavailable, http.StatusText(http.StatusServiceUnavailable)))
+	Result(ctx, errorx.NewCodeError(http.StatusServiceUnavailable, http.StatusText(http.StatusServiceUnavailable)))
 }
 
-func New(ctx *gin.Context, data interface{}) {
-	resp := newResponse(ctx, data)
-	resp.TraceId = fmt.Sprintf("%s", ctx.Value("traceId"))
-	status := getHttpStatus(data)
-	ctx.JSON(status, resp)
-}
-
-func getHttpStatus(data interface{}) int {
-	switch value := data.(type) {
-
-	case *errorx.CodeError:
-		if value.Code >= 100 && value.Code <= 511 { // 使用标准的http状态码
-			return value.Code
-		}
-	case error:
-		return http.StatusInternalServerError
+func Result(ctx *gin.Context, data interface{}) {
+	result := newResponse(ctx, data)
+	result.TraceId = fmt.Sprintf("%s", ctx.Value("traceId"))
+	httpStatus := http.StatusOK
+	if result.Code >= 100 && result.Code <= 511 {
+		httpStatus = result.Code
 	}
-	return http.StatusOK
+	ctx.JSON(httpStatus, result)
 }
 
 func newResponse(ctx context.Context, data interface{}) *response {
