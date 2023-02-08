@@ -1,34 +1,31 @@
 package svc
 
 import (
-	"context"
 	"gin-skeleton/config"
 	"gin-skeleton/svc/logx"
+	"gin-skeleton/svc/redisx"
 	"gin-skeleton/svc/sqlx"
-
-	"github.com/go-redis/redis/v8"
 )
 
 type ServiceContext struct {
 	Config config.Config
-	Redis  *AWRedis
+	Redis  *redisx.Client
 	Mysql  sqlx.SqlConn
 	CacheX *CacheX
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 
-	var Redis = redis.NewClient(&redis.Options{
-		Network:  c.Redis.Network,
-		Addr:     c.Redis.Addr,
-		Username: c.Redis.Username,
-		Password: c.Redis.Password,
-		DB:       c.Redis.DB,
-	})
 	logx.New(c.Log.Level, 2)
 	return &ServiceContext{
 		Config: c,
-		Redis:  NewRedis(context.Background(), Redis),
+		Redis: redisx.New(&redisx.Options{
+			Network:  c.Redis.Network,
+			Addr:     c.Redis.Addr,
+			Username: c.Redis.Username,
+			Password: c.Redis.Password,
+			DB:       c.Redis.DB,
+		}),
 		Mysql:  sqlx.NewMysql(c.Mysql.DataSource),
 		CacheX: NewCacheX(c),
 	}

@@ -2,10 +2,12 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"gin-skeleton/common/errorx"
 	"gin-skeleton/svc"
 	"gin-skeleton/svc/logx"
 	"gin-skeleton/types"
+	"time"
 )
 
 type IndexLogic struct {
@@ -32,7 +34,8 @@ func (that *IndexLogic) Handle(req *types.UserIndexReq) (resp *types.UserIndexRe
 		if req.Message == "" {
 			return nil, errorx.NewDefaultError("消息不能为空")
 		}
-		that.svcCtx.Redis.Get(req.Name).Val()
+		result, err := that.svcCtx.Redis.SetCtx(that.ctx, "name", "测试命令行344", time.Hour)
+		fmt.Println(result, err)
 		that.svcCtx.CacheX.Set(req.Name, req.Message)
 	}
 
