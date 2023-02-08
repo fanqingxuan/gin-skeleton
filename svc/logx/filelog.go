@@ -11,11 +11,21 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+const (
+	ServeLevel zapcore.Level = zapcore.DebugLevel - 3
+)
+
 type fileLogger struct {
 	zapLogger *zap.Logger
 	ctx       context.Context
 	skip      int
 }
+
+const (
+	infoFileName  = "info.log"
+	errorFileName = "error.log"
+	serveFileName = "access.log"
+)
 
 // 断言fileLogger实现了Logger接口
 var _ Logger = &fileLogger{}
@@ -49,6 +59,10 @@ func (fl *fileLogger) Warn(message ...interface{}) {
 
 func (fl *fileLogger) Error(message ...interface{}) {
 	fl.print(zap.ErrorLevel, message...)
+}
+
+func (fl *fileLogger) Serve(message ...interface{}) {
+	fl.print(ServeLevel, message...)
 }
 
 func (fl *fileLogger) Debugf(format string, message ...interface{}) {
@@ -104,7 +118,7 @@ func (fl *fileLogger) print(level zapcore.Level, messageSlice ...interface{}) {
 
 func getWriter(filename string) io.Writer {
 	hook := NewFileWriter(
-		fmt.Sprintf("%s/%s.log", "./logs", filename),
+		fmt.Sprintf("%s/%s", "./logs", filename),
 		//"2006-01-02T15-04-05.000"
 		"20060102",
 	)
@@ -133,7 +147,7 @@ func initLogger(loglevel string) *zap.Logger {
 		CallerKey:     "caller",
 		MessageKey:    "msg",
 		FunctionKey:   zapcore.OmitKey,
-		StacktraceKey: "stacktrace",
+		StacktraceKey: "",
 		LineEnding:    zapcore.DefaultLineEnding,
 
 		EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
@@ -142,22 +156,33 @@ func initLogger(loglevel string) *zap.Logger {
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeName:     zapcore.FullNameEncoder,
 		EncodeCaller:   zapcore.ShortCallerEncoder,
-		EncodeLevel:    zapcore.CapitalLevelEncoder,
+		EncodeLevel: func(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
+			if l != ServeLevel {
+				enc.AppendString(l.CapitalString())
+			} else {
+				enc.AppendString(zapcore.InfoLevel.CapitalString())
+			}
+		},
 	}
 
 	// 根据日志级别拆分日期
-	infoWriter := getWriter("info")
-	warnWriter := getWriter("error")
+	infoWriter := getWriter(infoFileName)
+	warnWriter := getWriter(errorFileName)
+	serveWriter := getWriter(serveFileName)
 
 	eableInfoLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool {
-		return l >= level && l < zap.WarnLevel
+		return l >= level && l < zap.WarnLevel && l != ServeLevel
 	})
 	enableWarnLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool {
-		return l >= level && l >= zap.WarnLevel
+		return l >= level && l >= zap.WarnLevel && l != ServeLevel
+	})
+	enableserveLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool {
+		return l == ServeLevel
 	})
 	cores := []zapcore.Core{
 		zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), zapcore.AddSync(infoWriter), eableInfoLevel),
 		zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), zapcore.AddSync(warnWriter), enableWarnLevel),
+		zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), zapcore.AddSync(serveWriter), enableserveLevel),
 	}
 
 	core := zapcore.NewTee(
