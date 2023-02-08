@@ -16,7 +16,7 @@ func AddHandler(svcCtx *svc.ServiceContext) gin.HandlerFunc {
 
 		var req types.UserAddReq
 		if err := ctx.ShouldBind(&req); err != nil {
-			logx.WithContext(ctx).Error("Handler ShouldBind Parse")
+			logx.WithContext(ctx).Errorf("Handler ShouldBind Parse %v", err)
 			responsex.Result(ctx, errorx.NewCodeError(1, err.Error()))
 
 			return

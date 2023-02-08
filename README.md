@@ -9,7 +9,7 @@
 
 - 集成uber用于记录日志
 
-  项目中日志进行了分解:
+  项目中日志按天进行了分解:
   - request日志
     
     记录http的request日志，方便查看请求参数
@@ -25,7 +25,8 @@
     日志格式如下,包括了traceId、file、line，以及我们记录的重要信息:
     
   ```shell
-      {"level":"INFO","time":"2023-02-06 13:05:27.670","caller":"user/infologic.go:39","msg":"info测试 姓名 %!s(int=43)","traceId":"3137fb9e-ac8b-41ba-88a0-28e0ae0bd7cc"}
+     {"level":"ERROR","time":"2023-02-08 12:53:51.369","caller":"user/infohandler.go:19","msg":"Handler ShouldBind Parse","traceId":"67d783ba-e34f-429f-a077-97e87d00e2d3"}
+
 
   ```
 
