@@ -60,7 +60,13 @@
 	go.uber.org/zap v1.23.0
 	gopkg.in/yaml.v3 v3.0.1
 ```
+### 快速启动
+```shell
+1. https://github.com/fanqingxuan/gin-skeleton.git
+2. cd gin-skeleton && go mod tidy
+3. go run main.go -f .env.yaml
+```
 
 ### 代办
-- Redis库整理
 - 自动生成model、logic文件、handler工具
+- 数据库迁移
