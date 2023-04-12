@@ -3,12 +3,15 @@ package model
 import (
 	"context"
 	"gin-skeleton/svc/sqlx"
+
+	"github.com/golang-module/carbon/v2"
 )
 
 type User struct {
-	Uid      int64  `db:"uid"`
-	Username string `db:"username"`
-	Age      int64  `db:"age"`
+	Uid      int64            `db:"uid"`
+	Username string           `db:"username"`
+	Age      int64            `db:"age"`
+	Ctime    carbon.Timestamp `db:"create_time"`
 }
 
 type UserModel struct {

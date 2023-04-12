@@ -5,6 +5,8 @@ import (
 	"gin-skeleton/svc/logx"
 	"gin-skeleton/svc/redisx"
 	"gin-skeleton/svc/sqlx"
+
+	_ "github.com/golang-module/carbon/v2"
 )
 
 type ServiceContext struct {
@@ -15,7 +17,6 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-
 	logx.New(c.Log.Level, 2)
 	return &ServiceContext{
 		Config: c,

@@ -36,9 +36,9 @@ func (that *InfoLogic) Handle(req *types.UserInfoReq) (resp *types.UserInfoReply
 	that.Logger.Error(req)
 
 	that.Logger.Debugf("debg测试 %s %d", "姓名", 43)
-	that.Logger.Infof("info测试 %s %s", "姓名", 43)
-	that.Logger.Warnf("warn测试 %s %s", "姓名", 43)
-	that.Logger.Errorf("error测试 %s %s", "姓名", 43)
+	that.Logger.Infof("info测试 %s %d", "姓名", 43)
+	that.Logger.Warnf("warn测试 %s %d", "姓名", 43)
+	that.Logger.Errorf("error测试 %s %d", "姓名", 43)
 	user, err := that.UserModel.List(100)
 	that.Logger.Info(user)
 	if err != nil {
@@ -53,6 +53,7 @@ func (that *InfoLogic) Handle(req *types.UserInfoReq) (resp *types.UserInfoReply
 	}
 	resp = &types.UserInfoReply{
 		Message: "hello",
+		Ctime:   user[0].Ctime,
 	}
 	return
 

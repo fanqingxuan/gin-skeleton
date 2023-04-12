@@ -1,5 +1,7 @@
 package types
 
+import "github.com/golang-module/carbon/v2"
+
 type UserIndexReq struct {
 	Name    string `json:"name" form:"name" binding:"required"`
 	Message string `json:"message" form:"message"`
@@ -15,6 +17,7 @@ type UserInfoReq struct {
 
 type UserInfoReply struct {
 	Message string `json:"message"`
+	Ctime   carbon.Timestamp
 }
 
 type UserAddReq struct {
