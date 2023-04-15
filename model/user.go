@@ -15,23 +15,21 @@ type User struct {
 }
 
 type UserModel struct {
-	db  sqlx.SqlConn
-	ctx context.Context
+	Model
 }
 
 func NewUserModel(ctx context.Context, db sqlx.SqlConn) UserModel {
 	return UserModel{
-		db:  db,
-		ctx: ctx,
+		Model: NewModel(ctx, db),
 	}
 }
 
 func (that *UserModel) FindOne(pk uint) (*User, error) {
-	var resp User
-	err := that.db.QueryRowCtx(that.ctx, &resp, "select * from users where uid=?", pk)
+	var user User
+	err := that.QueryOne(&user, "select * from users where uid=?", pk)
 	switch err {
 	case nil:
-		return &resp, nil
+		return &user, nil
 	case sqlx.ErrNotFound:
 		return nil, sqlx.ErrNotFound
 	default:
@@ -40,11 +38,11 @@ func (that *UserModel) FindOne(pk uint) (*User, error) {
 }
 
 func (that *UserModel) List(age int) ([]User, error) {
-	var resp []User
-	err := that.db.QueryRowsCtx(that.ctx, &resp, "select * from users where age>?", age)
+	var users []User
+	err := that.QueryAll(&users, "select age,username from users where age>?", age)
 	switch err {
 	case nil:
-		return resp, nil
+		return users, nil
 	case sqlx.ErrNotFound:
 		return nil, sqlx.ErrNotFound
 	default:
@@ -53,9 +51,9 @@ func (that *UserModel) List(age int) ([]User, error) {
 }
 
 func (that *UserModel) Insert(user *User) (int64, error) {
-	const insertsql = `insert into users (username,age) values(?, ?)`
+	const sql = `insert into users (username,age) values(?, ?)`
 	// insert op
-	res, err := that.db.Exec(insertsql, user.Username, user.Age)
+	res, err := that.Execute(sql, user.Username, user.Age)
 	if err != nil {
 		return -1, err
 	}
@@ -67,8 +65,8 @@ func (that *UserModel) Insert(user *User) (int64, error) {
 }
 
 func (that *UserModel) Delete(pk uint64) error {
-	const deletesql = `delete from users where uid=?`
+	const sql = `delete from users where uid=?`
 	// insert op
-	_, err := that.db.Exec(deletesql, pk)
+	_, err := that.Execute(sql, pk)
 	return err
 }
