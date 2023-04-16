@@ -7,6 +7,7 @@ import (
 	"gin-skeleton/svc/sqlx"
 
 	_ "github.com/golang-module/carbon/v2"
+	_ "github.com/json-iterator/go"
 )
 
 type ServiceContext struct {

@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"gin-skeleton/common/responsex"
 	"gin-skeleton/handler/user"
 	"gin-skeleton/svc"
-	"net/http"
+
+	"gin-skeleton/common/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,8 +23,15 @@ func RegisterHandlers(r *gin.Engine, svcCtx *svc.ServiceContext) {
 	})
 
 	r.GET("/", func(c *gin.Context) {
-		c.Header("Content-Type", "text/html; charset=utf-8")
-		c.String(http.StatusOK, "<b>Hello World</b>")
+		m := map[string]string{
+			"message": "Hello World",
+		}
+		a, _ := utils.Encode(m)
+
+		var mm map[string]string
+		utils.Decode(a, &mm)
+		fmt.Println(mm)
+		c.String(200, string(a))
 	})
 	r.GET("/user", user.IndexHandler(svcCtx))
 
