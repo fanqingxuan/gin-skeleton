@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"gin-skeleton/svc/sqlx"
+	"reflect"
 )
 
 type Model struct {
@@ -18,15 +19,15 @@ func NewModel(ctx context.Context, db sqlx.SqlConn) Model {
 	}
 }
 
-func (that *Model) QueryOne(v interface{}, query string, args ...interface{}) error {
-	return that.db.QueryRowPartialCtx(that.ctx, v, query, args...)
+func (that *Model) Query(v interface{}, query string, args ...interface{}) error {
+	if reflect.TypeOf(v).Elem().Kind() == reflect.Slice {
+		return that.db.QueryRowsPartialCtx(that.ctx, v, query, args...)
+	} else {
+		return that.db.QueryRowPartialCtx(that.ctx, v, query, args...)
+	}
 }
 
-func (that *Model) QueryAll(v interface{}, query string, args ...interface{}) error {
-	return that.db.QueryRowsPartialCtx(that.ctx, v, query, args...)
-}
-
-func (that *Model) Execute(query string, args ...interface{}) (sql.Result, error) {
+func (that *Model) Exec(query string, args ...interface{}) (sql.Result, error) {
 	result, err := that.db.ExecCtx(that.ctx, query, args...)
 	if err != nil {
 		return nil, err

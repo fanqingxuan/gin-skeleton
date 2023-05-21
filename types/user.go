@@ -16,8 +16,8 @@ type UserInfoReq struct {
 }
 
 type UserInfoReply struct {
-	Message string `json:"message"`
-	Ctime   carbon.Timestamp
+	Message string          `json:"message"`
+	Ctime   carbon.DateTime `json:"ctime"`
 }
 
 type UserAddReq struct {
